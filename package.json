@@ -1,0 +1,14 @@
+{
+  "name": "munger",
+  "version": "0.1.0",
+  "description": "probably should have just learned sed",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tom Theisen",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^4.5.2"
+  }
+}
