@@ -1,11 +1,10 @@
 type Locator = string | RegExp;
 export type Replacement = string | Ruleset | ReplacementAST;
-export type Munger = Repeater | Ruleset | string
+export type Munger = Repeater | Sequence | Ruleset | string
 
-export enum Which { FirstOnly, AllSimultaneously }
+export enum Which { FirstOnly, All }
 
 type ReplacementAST = never;
-
 
 type Match = {
     index: number;
@@ -38,13 +37,12 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
 
 export function munge(input: string, munger: Munger): string {
     let output: string[] = [];
-    apply(input, munger, output);
-    return output.join('');
+    return apply(input, munger);
 }
 
-function apply(input: string, munger: Munger, output: string[]): void {
-    if (typeof munger === 'string') output.push(munger);
-    else munger.apply(input, output);
+function apply(input: string, munger: Munger): string {
+    if (typeof munger === 'string') return munger;
+    else return munger.apply(input);
 }
 
 type Rule = { find: Locator, replace: Replacement };
@@ -57,47 +55,62 @@ export class Ruleset {
         this.rules = rules;
     }
 
-    private applyOnce(input: string, output: string[]): void {
-        let searchIndex = 0;
-        for (let i = 0; searchIndex < input.length; ++i) {
+    apply(input: string): string {
+        let searchIndex = 0, output: string[] = [];
+        for (let i = 0; searchIndex <= input.length; ++i) {
             let matches = this.rules
                 .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.find) }))
-                .filter(m => m.match?.value);
+                .filter(m => m.match != null);
             if (matches.length === 0) break;
             
-            let { index, match } = matches.reduce((a, b) => a.match!.index < b.match!.index ? a : b);
+            let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
             if (!match) break;
             
             let { replace } = this.rules[index];
 
-            output.push(input.substring(searchIndex, match.index));
-            apply(match.value, replace, output);
-            searchIndex = match.index + match.value.length;
+            output.push(
+                input.substring(searchIndex, match.index),
+                apply(match.value, replace));
+            searchIndex = match.index + (match.value.length || 1);
 
             if (this.which === Which.FirstOnly) break;
         }
-        output.push(input.substring(searchIndex));
+        return output.join('') + input.substring(searchIndex);
     }
 
-    apply(input: string, output: string[]): void {
-        this.applyOnce(input, output);
+    repeat() {
+        return new Repeater(this);
     }
 }
 
-class Repeater {
+export class Repeater {
     private munger: Munger;
 
     constructor(munger: Munger) {
         this.munger = munger;
     }
 
-    apply(input: string, output: string[]) {
-        let myOutput: string[];
+    apply(input: string): string {
         do {
-            myOutput = [];
-            apply(input, this.munger, myOutput);
-            input = myOutput.join('');
-        } while (myOutput.length > 1);
-        output.push(...myOutput);
+            let output = apply(input, this.munger);
+            if (output === input) break;
+            input = output;
+        } while (true);
+        return input;
+    }
+}
+
+export class Sequence {
+    steps: Munger[];
+
+    constructor(...steps: Munger[]) {
+        this.steps = steps;
+    }
+
+    apply(input: string): string {
+        for (let munger of this.steps) {
+            input = apply(input, munger);
+        }
+        return input;
     }
 }
