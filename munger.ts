@@ -1,12 +1,12 @@
-type Transform = Ruleset | string
+export type Transform = Ruleset | string
 
-enum Which { FirstOnly, AllSimultaneously }
-enum When { Once, UntilStable }
+export enum Which { FirstOnly, AllSimultaneously }
+export enum When { Once, UntilStable }
 
 type ReplacementAST = never;
 
 type Locator = string | RegExp;
-type Replacement = string | Ruleset | ReplacementAST;
+export type Replacement = string | Ruleset | ReplacementAST;
 
 type Match = {
     index: number;
@@ -37,26 +37,34 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
     }
 }
 
+export function munge(input: string, replacement: Replacement): string {
+    let output: string[] = [];
+    apply(input, replacement, output);
+    return output.join('');
+}
+
 function apply(input: string, replacement: Replacement, output: string[]): void {
     if (typeof replacement === 'string') output.push(replacement);
     if (replacement instanceof Ruleset) replacement.apply(input, output);
 }
 
-class Ruleset {
-    rules: { location: Locator, replace: Replacement }[] = [];
+type Rule = { find: Locator, replace: Replacement };
+export class Ruleset {
+    rules: Rule[];
     which: Which;
     when: When;
 
-    constructor(which: Which, when: When) {
+    constructor(which: Which, when: When, ...rules: Rule[]) {
         this.which = which;
         this.when = when;
+        this.rules = rules;
     }
 
     private applyOnce(input: string, output: string[]): void {
         let searchIndex = 0;
         for (let i = 0; searchIndex < input.length; ++i) {
             let matches = this.rules
-                .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.location) }))
+                .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.find) }))
                 .filter(m => m.match?.value);
             if (matches.length === 0) break;
             
@@ -65,7 +73,7 @@ class Ruleset {
             
             let { replace } = this.rules[index];
 
-            output.push(input.substring(0, match.index));
+            output.push(input.substring(searchIndex, match.index));
             apply(match.value, replace, output);
             searchIndex = match.index + match.value.length;
 
