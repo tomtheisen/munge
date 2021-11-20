@@ -1,12 +1,11 @@
-export type Transform = Ruleset | string
+type Locator = string | RegExp;
+export type Replacement = string | Ruleset | ReplacementAST;
+export type Munger = Repeater | Ruleset | string
 
 export enum Which { FirstOnly, AllSimultaneously }
-export enum When { Once, UntilStable }
 
 type ReplacementAST = never;
 
-type Locator = string | RegExp;
-export type Replacement = string | Ruleset | ReplacementAST;
 
 type Match = {
     index: number;
@@ -37,26 +36,24 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
     }
 }
 
-export function munge(input: string, replacement: Replacement): string {
+export function munge(input: string, munger: Munger): string {
     let output: string[] = [];
-    apply(input, replacement, output);
+    apply(input, munger, output);
     return output.join('');
 }
 
-function apply(input: string, replacement: Replacement, output: string[]): void {
-    if (typeof replacement === 'string') output.push(replacement);
-    if (replacement instanceof Ruleset) replacement.apply(input, output);
+function apply(input: string, munger: Munger, output: string[]): void {
+    if (typeof munger === 'string') output.push(munger);
+    else munger.apply(input, output);
 }
 
 type Rule = { find: Locator, replace: Replacement };
 export class Ruleset {
     rules: Rule[];
     which: Which;
-    when: When;
 
-    constructor(which: Which, when: When, ...rules: Rule[]) {
+    constructor(which: Which, ...rules: Rule[]) {
         this.which = which;
-        this.when = when;
         this.rules = rules;
     }
 
@@ -82,22 +79,25 @@ export class Ruleset {
         output.push(input.substring(searchIndex));
     }
 
-    private stabilize(input: string): string {
-        for (let output: string[]; ; input = output.join('')) {
-            this.applyOnce(input, output = []);
-            if (output.length == 1) return output[0];
-        }
-    }
-
     apply(input: string, output: string[]): void {
-        switch (this.when) {
-            case When.Once:
-                this.applyOnce(input, output);
-                break;
-            case When.UntilStable:
-                output.push(this.stabilize(input));
-                break;
-        }
+        this.applyOnce(input, output);
     }
 }
 
+class Repeater {
+    private munger: Munger;
+
+    constructor(munger: Munger) {
+        this.munger = munger;
+    }
+
+    apply(input: string, output: string[]) {
+        let myOutput: string[];
+        do {
+            myOutput = [];
+            apply(input, this.munger, myOutput);
+            input = myOutput.join('');
+        } while (myOutput.length > 1);
+        output.push(...myOutput);
+    }
+}

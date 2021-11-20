@@ -1,6 +1,6 @@
-import { munge, Ruleset, When, Which, Transform } from './munger.js';
+import { munge, Ruleset, Which, Munger } from './munger.js';
 
-function testCase(input: string, transform: Transform, expected: string) {
+function testCase(input: string, transform: Munger, expected: string) {
     const actual = munge(input, transform);
     const success = expected == actual;
     if (success) console.log("good");
@@ -12,7 +12,7 @@ function testCase(input: string, transform: Transform, expected: string) {
 }
 
 const input = "the foo the bar the foobar legend";
-const replace = new Ruleset(Which.AllSimultaneously, When.Once,
+const replace = new Ruleset(Which.AllSimultaneously, 
     { find: "foo", replace: "bar" },
     { find: /bar/g, replace: "foo" });
 const expected = "the bar the foo the barfoo legend";
