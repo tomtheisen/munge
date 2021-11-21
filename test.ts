@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Repeater, Sequence, replaceOne as singleReplace } from './munger.js';
+import { munge, Ruleset, Which, Munger, Repeater, Sequence, replaceOne as singleReplace, ReplacementAST } from './munger.js';
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
@@ -101,5 +101,8 @@ function testCase(input: string, munger: Munger, expected: string) {
 }
 
 {
-    
+    const input = "abcd";
+    const replace = new ReplacementAST('len');
+    const expected = "4";
+    testCase(input, replace, expected);
 }
