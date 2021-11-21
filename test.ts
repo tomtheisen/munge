@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Repeater, Sequence } from './munger.js';
+import { munge, Ruleset, Which, Munger, Repeater, Sequence, replaceOne as singleReplace } from './munger.js';
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
@@ -90,3 +90,12 @@ function testCase(input: string, munger: Munger, expected: string) {
     }
 }
 
+{
+    const input = 'a,,b,"c,d",e';
+    const replace = new Ruleset(Which.All,
+        { find: /".*?"/g, replace: singleReplace(/^"|"$/g, "") },
+        // { find: /[^,]+/g, replace: new Ruleset(Which.All) },
+        { find: ',', replace: "\n" });
+    const expected = "a\n\nb\nc,d\ne";
+    testCase(input, replace, expected);
+}

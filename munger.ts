@@ -82,6 +82,13 @@ export class Ruleset {
         return new Repeater(this);
     }
 }
+export const noop = new Ruleset(Which.All);
+Object.freeze(noop);
+Object.freeze(noop.rules);
+
+export function replaceOne(find: Locator, replace: Replacement) {
+    return new Ruleset(Which.All, { find, replace });
+}
 
 export class Repeater {
     private munger: Munger;
