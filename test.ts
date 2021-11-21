@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Repeater, Sequence, replaceOne as singleReplace, ReplacementAST } from './munger.js';
+import { munge, Ruleset, Which, Munger, Repeater, Sequence, singleRule, Proc } from './munger.js';
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
@@ -93,7 +93,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = 'a,,b,"c,d",e';
     const replace = new Ruleset(Which.All,
-        { find: /".*?"/g, replace: singleReplace(/^"|"$/g, "") },
+        { find: /".*?"/g, replace: singleRule(/^"|"$/g, "") },
         // { find: /[^,]+/g, replace: new Ruleset(Which.All) },
         { find: ',', replace: "\n" });
     const expected = "a\n\nb\nc,d\ne";
@@ -102,7 +102,50 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "abcd";
-    const replace = new ReplacementAST('len');
+    const replace = new Proc('len');
     const expected = "4";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "2,11,5,4,3";
+    const replace = new Sequence(
+        new Ruleset(Which.All,
+            { find: /\d+/g, replace: new Proc('"m" getvar max "m" setvar drop') },
+            { find: ',', replace: '' }),
+        new Proc('"m" getvar')
+    );
+    const expected = "11";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "3,2,5,4,11,3";
+    const replace = singleRule(/\d+/g, new Proc('"m" getvar max "m" setvar'));
+    const expected = "3,3,5,5,11,11";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "3,2,5,4,11,3";
+    const replace = new Sequence(
+        singleRule(/\d+/g, new Proc('"m" getvar max "m" setvar drop _')),
+        singleRule(/\d+/g, new Proc('drop "m" getvar')));
+    const expected = "11,11,11,11,11,11";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = `
+        a
+        bbbb
+        cc`.replace(/\r?\n/, '');
+    const replace = new Sequence(
+        singleRule(/.+/g, new Proc('len "maxlen" getvar max "maxlen" setvar drop _')),
+        singleRule(/.+/g, new Proc('"maxlen" getvar lpad')));
+    const expected = `
+           a
+        bbbb
+          cc`.replace(/\r?\n/, '');
     testCase(input, replace, expected);
 }

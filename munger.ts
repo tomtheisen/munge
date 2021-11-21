@@ -1,5 +1,5 @@
 type Locator = string | RegExp;
-export type Replacement = string | Ruleset | ReplacementAST;
+export type Replacement = string | Ruleset | Proc;
 export type Munger = Repeater | Sequence | Replacement
 
 export enum Which { FirstOnly, All }
@@ -7,12 +7,13 @@ export enum Which { FirstOnly, All }
 type Context = {
     registers: Map<string, string>;
     arrays: Map<string, string[]>;
+    procs: ReadonlyMap<string, Proc>;
 };
-function newContext(): Context {
-    return { registers: new Map, arrays: new Map };
+function makeContext(): Context {
+    return { registers: new Map, arrays: new Map, procs: new Map };
 }
 
-export class ReplacementAST {
+export class Proc {
     private instructions: string[];
     constructor(instructions: string) {
         this.instructions = Array
@@ -43,6 +44,17 @@ export class ReplacementAST {
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
                 case 'lpad': push(pop(1).padStart(Number(pop()))); break;
+                case 'max': stack.length >= 2 && push(Math.max(Number(pop()), Number(pop())).toString()); break;
+                case 'min': stack.length >= 2 && push(Math.min(Number(pop()), Number(pop())).toString()); break;
+                case '>': push(pop(1) > pop() ? "1" : "0"); break;
+                case '<': push(pop(1) < pop() ? "1" : "0"); break;
+                case '=': push(pop() == pop() ? "1" : "0"); break;
+                case 'if': Number(pop()) ? (pop(), pop()) : (pop(1), pop()); break;
+
+                case 'setvar': ctx.registers.set(pop(), peek()); break;
+                case 'getvar': push(ctx.registers.get(pop()) ?? ""); break;
+
+                case 'push': ctx.arrays.get(pop())?.push(pop());
                 
                 default: throw "unrecognized instruction " + instr;
             }
@@ -80,14 +92,13 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
     }
 }
 
-export function munge(input: string, munger: Munger, ctx: Context = newContext()): string {
-    let output: string[] = [];
-    return apply(input, munger, ctx);
+export function munge(input: string, munger: Munger) {
+    return mungeCore(input, munger, makeContext());
 }
 
-function apply(input: string, munger: Munger, ctx: Context): string {
+function mungeCore(input: string, munger: Munger, ctx: Context): string {
     if (typeof munger === 'string') return munger;
-    else if (munger instanceof ReplacementAST) return munger.evaluate(input, ctx);
+    else if (munger instanceof Proc) return munger.evaluate(input, ctx);
     else return munger.apply(input, ctx);
 }
 
@@ -116,7 +127,7 @@ export class Ruleset {
 
             output.push(
                 input.substring(searchIndex, match.index),
-                apply(match.value, replace, ctx));
+                mungeCore(match.value, replace, ctx));
             searchIndex = match.index + (match.value.length || 1);
 
             if (this.which === Which.FirstOnly) break;
@@ -132,7 +143,7 @@ export const noop = new Ruleset(Which.All);
 Object.freeze(noop);
 Object.freeze(noop.rules);
 
-export function replaceOne(find: Locator, replace: Replacement) {
+export function singleRule(find: Locator, replace: Replacement) {
     return new Ruleset(Which.All, { find, replace });
 }
 
@@ -145,7 +156,7 @@ export class Repeater {
 
     apply(input: string, ctx: Context): string {
         do {
-            let output = apply(input, this.munger, ctx);
+            let output = mungeCore(input, this.munger, ctx);
             if (output === input) break;
             input = output;
         } while (true);
@@ -162,7 +173,7 @@ export class Sequence {
 
     apply(input: string, ctx: Context): string {
         for (let munger of this.steps) {
-            input = apply(input, munger, ctx);
+            input = mungeCore(input, munger, ctx);
         }
         return input;
     }
