@@ -1,10 +1,41 @@
 type Locator = string | RegExp;
 export type Replacement = string | Ruleset | ReplacementAST;
-export type Munger = Repeater | Sequence | Ruleset | string
+export type Munger = Repeater | Sequence | Replacement
 
 export enum Which { FirstOnly, All }
 
-type ReplacementAST = never;
+type Context = {
+    value: string;
+};
+class ReplacementAST {
+    private instructions: string[];
+    constructor(instructions: string) {
+        this.instructions = Array
+            .from(instructions.matchAll(/".*?"|\d+|./g))
+            .map(m => m[0]);
+    }
+
+    evaluate(ctx: Context): string {
+        let stack: string[] = [ctx.value];
+        for (let instr of this.instructions) {
+            if (/^\d+$/.test(instr)) stack.push(instr);
+            else if (instr.startsWith('"')) stack.push(instr.substring(1, instr.length - 1));
+            else switch (instr) {
+                case '_': stack.push(ctx.value); break;
+                case 'L': stack.push(stack.pop()!.length.toString()); break;
+                case '+': {
+                    const b = stack.pop()!, a = stack.pop()!;
+                    stack.push(a + b);
+                    break;
+                }
+                case '(': {
+                    
+                }
+            }
+        }
+        return stack.pop() ?? "";
+    }
+};
 
 type Match = {
     index: number;
@@ -42,6 +73,7 @@ export function munge(input: string, munger: Munger): string {
 
 function apply(input: string, munger: Munger): string {
     if (typeof munger === 'string') return munger;
+    else if (munger instanceof ReplacementAST) return munger.evaluate({ value: input });
     else return munger.apply(input);
 }
 

@@ -99,3 +99,7 @@ function testCase(input: string, munger: Munger, expected: string) {
     const expected = "a\n\nb\nc,d\ne";
     testCase(input, replace, expected);
 }
+
+{
+    
+}
