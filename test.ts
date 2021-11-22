@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Repeater, Sequence, singleRule, Proc } from './munger.js';
+import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, noop } from './munger.js';
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
@@ -14,6 +14,13 @@ function testCase(input: string, munger: Munger, expected: string) {
 }
 
 {
+    const input = "a";
+    const replace = singleRule("", "x");
+    const expected = "xax";
+    testCase(input, replace, expected);
+}
+
+{
     const input = "the foo the bar the foobar legend";
     const replace = new Ruleset(Which.All, 
         { find: "foo", replace: "bar" },
@@ -24,7 +31,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "gooooooooooooooooal";
-    const replace = new Repeater(new Ruleset(Which.FirstOnly, { find: "oo", replace: "o" }));
+    const replace = new Ruleset(Which.FirstOnly, { find: "oo", replace: "o" }).repeat();
     const expected = "goal";
     testCase(input, replace, expected);
 }
@@ -164,5 +171,47 @@ function testCase(input: string, munger: Munger, expected: string) {
         a,c
         d,f,g
         h`.replace(/\r?\n/, '');
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "a";
+    const replace = singleRule('a', new Proc('drop "\n"'));
+    const expected = "\n";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "<outer><inner/><inner><child/></inner></outer>";
+    const replace = new Ruleset(Which.All,
+        { find: /<\w+>/g, replace: new Proc('drop " " "indent" getvar rep "indent" getvar 4 + "indent" setvar drop _ "\n"') },
+        { find: /<\/\w+>/g, replace: new Proc('drop " " "indent" getvar 4 - "indent" setvar rep _ "\n"') },
+        { find: /<\w+\/>/g, replace: new Proc('drop " " "indent" getvar rep _ "\n"') });
+    const expected = `
+<outer>
+    <inner/>
+    <inner>
+        <child/>
+    </inner>
+</outer>
+`.trimStart();
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "<outer>                             <inner/><inner><child/></inner></outer>";
+    const replace = new Ruleset(Which.All,
+        { find: /\s+/g, replace: '' },
+        { find: /<\w+>/g, replace: new Proc('drop " " "indent" getvar rep "indent" getvar 4 + "indent" setvar drop _ "\n"') },
+        { find: /<\/\w+>/g, replace: new Proc('drop " " "indent" getvar 4 - "indent" setvar rep _ "\n"') },
+        { find: /<\w+\/>/g, replace: new Proc('drop " " "indent" getvar rep _ "\n"') });
+    const expected = `
+<outer>
+    <inner/>
+    <inner>
+        <child/>
+    </inner>
+</outer>
+`.trimStart();
     testCase(input, replace, expected);
 }

@@ -17,7 +17,7 @@ export class Proc {
     private instructions: string[];
     constructor(instructions: string) {
         this.instructions = Array
-            .from(instructions.matchAll(/".*?"|\S+/g))
+            .from(instructions.matchAll(/".*?"|\S+/sg))
             .map(m => m[0]);
     }
 
@@ -38,7 +38,9 @@ export class Proc {
 
         for (let instr of this.instructions) {
             if (/^-?\d+$/.test(instr)) push(instr);
-            else if (instr.startsWith('"')) push(instr.substring(1, instr.length - 1));
+            else if (instr.startsWith('"')) {
+                push(instr.substring(1, instr.length - 1));
+            }
             else switch (instr) {
                 case '_': push(input); break;
                 case 'len': push(pop().length); break;
@@ -55,6 +57,7 @@ export class Proc {
                 case '=': push(pop() == pop() ? 1 : 0); break;
                 case '+': push(Number(pop()) + Number(pop())); break;
                 case '-': push(Number(pop(1)) - Number(pop())); break;
+                case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                 case 'not': push(Number(pop()) ? 0 : 1); break;
                 case 'if': push(Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
@@ -68,7 +71,7 @@ export class Proc {
                 default: throw "unrecognized instruction " + instr;
             }
         }
-        return stack.join('');
+        return stack.reverse().join('');
     }
 };
 
@@ -80,7 +83,7 @@ type Match = {
 
 function nextMatch(input: string, start: number, locator: Locator): Match | undefined {
     if (typeof locator === 'string') {
-        const index = input.indexOf(locator, start);
+        const index = start > input.length ? -1 : input.indexOf(locator, start);
         if (index >= 0) return {
             index,
             value: locator,
@@ -122,28 +125,32 @@ export class Ruleset {
     }
 
     apply(input: string, ctx: Context): string {
-        let lastSearchIndex = -1, searchIndex = 0, patternIndex = -1, output: string[] = [];
-        for (let matchCount = 0; searchIndex <= input.length; ++matchCount) {
+        let startOfMatch = -1, endOfMatch = 0, patternIndex = -1, output: string[] = [];
+        for (let matchCount = 0; endOfMatch <= input.length; ++matchCount) {
             let matches = this.rules
-                .map((r, index) => ({ index, match: nextMatch(input, lastSearchIndex === searchIndex && index <= patternIndex ? searchIndex + 1 : searchIndex, r.find) }))
-                // .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.find) }))
+                .map((r, index) => {
+                    let startIndex = endOfMatch;
+                    if (startOfMatch === startIndex && index <= patternIndex) ++startIndex;
+                    return { index, match: nextMatch(input, startIndex, r.find) };
+                })
                 .filter(m => m.match != null);
             if (matches.length === 0) break;
             
             let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
             if (!match) break;
             
-            let { replace } = this.rules[patternIndex = index];
+            patternIndex = index;
+            let { replace } = this.rules[patternIndex];
 
             output.push(
-                input.substring(searchIndex, match.index),
+                input.substring(endOfMatch, match.index),
                 mungeCore(match.value, replace, ctx));
-            lastSearchIndex = searchIndex;
-            searchIndex = match.index + match.value.length;
+            startOfMatch = match.index;
+            endOfMatch = match.index + match.value.length;
 
             if (this.which === Which.FirstOnly) break;
         }
-        return output.join('') + input.substring(searchIndex);
+        return output.join('') + input.substring(endOfMatch);
     }
 
     repeat() {
