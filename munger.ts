@@ -23,7 +23,11 @@ export class Proc {
 
     evaluate(input: string, ctx: Context): string {
         let stack: string[] = [input];
-        const push = stack.unshift.bind(stack);
+        function push(...es: (string | number)[]) {
+            for (let e of es) {
+                stack.unshift(typeof e === 'string' ? e : e.toString());   
+            }
+        }
         function pop(depth: number = 0) {
             if (depth === 0) return stack.shift() ?? "";
             return stack.splice(depth, 1)[0] ?? "";
@@ -33,23 +37,28 @@ export class Proc {
         }
 
         for (let instr of this.instructions) {
-            if (/^\d+$/.test(instr)) push(instr);
+            if (/^-?\d+$/.test(instr)) push(instr);
             else if (instr.startsWith('"')) push(instr.substring(1, instr.length - 1));
             else switch (instr) {
                 case '_': push(input); break;
-                case 'len': push(pop().length.toString()); break;
+                case 'len': push(pop().length); break;
                 case 'swap': push(pop(), pop()); break;
                 case 'copy': push(peek(), peek()); break;
                 case 'drop': pop(); break;
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
                 case 'lpad': push(pop(1).padStart(Number(pop()))); break;
-                case 'max': stack.length >= 2 && push(Math.max(Number(pop()), Number(pop())).toString()); break;
-                case 'min': stack.length >= 2 && push(Math.min(Number(pop()), Number(pop())).toString()); break;
-                case '>': push(pop(1) > pop() ? "1" : "0"); break;
-                case '<': push(pop(1) < pop() ? "1" : "0"); break;
-                case '=': push(pop() == pop() ? "1" : "0"); break;
-                case 'if': Number(pop()) ? (pop(), pop()) : (pop(1), pop()); break;
+                case 'max': stack.length >= 2 && push(Math.max(Number(pop()), Number(pop()))); break;
+                case 'min': stack.length >= 2 && push(Math.min(Number(pop()), Number(pop()))); break;
+                case '>': push(pop(1) > pop() ? 1 : 0); break;
+                case '<': push(pop(1) < pop() ? 1 : 0); break;
+                case '=': push(pop() == pop() ? 1 : 0); break;
+                case '+': push(Number(pop()) + Number(pop())); break;
+                case '-': push(Number(pop(1)) - Number(pop())); break;
+
+                case 'not': push(Number(pop()) ? 0 : 1); break;
+                case 'if': push(Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
+                case 'when': Number(pop()) || (pop(), push("")); break;
 
                 case 'setvar': ctx.registers.set(pop(), peek()); break;
                 case 'getvar': push(ctx.registers.get(pop()) ?? ""); break;
@@ -113,22 +122,24 @@ export class Ruleset {
     }
 
     apply(input: string, ctx: Context): string {
-        let searchIndex = 0, output: string[] = [];
-        for (let i = 0; searchIndex <= input.length; ++i) {
+        let lastSearchIndex = -1, searchIndex = 0, patternIndex = -1, output: string[] = [];
+        for (let matchCount = 0; searchIndex <= input.length; ++matchCount) {
             let matches = this.rules
-                .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.find) }))
+                .map((r, index) => ({ index, match: nextMatch(input, lastSearchIndex === searchIndex && index <= patternIndex ? searchIndex + 1 : searchIndex, r.find) }))
+                // .map((r, index) => ({ index, match: nextMatch(input, searchIndex, r.find) }))
                 .filter(m => m.match != null);
             if (matches.length === 0) break;
             
             let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
             if (!match) break;
             
-            let { replace } = this.rules[index];
+            let { replace } = this.rules[patternIndex = index];
 
             output.push(
                 input.substring(searchIndex, match.index),
                 mungeCore(match.value, replace, ctx));
-            searchIndex = match.index + (match.value.length || 1);
+            lastSearchIndex = searchIndex;
+            searchIndex = match.index + match.value.length;
 
             if (this.which === Which.FirstOnly) break;
         }
@@ -155,11 +166,11 @@ export class Repeater {
     }
 
     apply(input: string, ctx: Context): string {
-        do {
-            let output = mungeCore(input, this.munger, ctx);
+        while (true) {
+            const output = mungeCore(input, this.munger, ctx);
             if (output === input) break;
             input = output;
-        } while (true);
+        }
         return input;
     }
 }
@@ -172,9 +183,7 @@ export class Sequence {
     }
 
     apply(input: string, ctx: Context): string {
-        for (let munger of this.steps) {
-            input = mungeCore(input, munger, ctx);
-        }
+        for (let munger of this.steps) input = mungeCore(input, munger, ctx);
         return input;
     }
 }

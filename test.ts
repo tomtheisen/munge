@@ -149,3 +149,20 @@ function testCase(input: string, munger: Munger, expected: string) {
           cc`.replace(/\r?\n/, '');
     testCase(input, replace, expected);
 }
+
+{
+    const input = `
+        a,b,c
+        d,e,f,g
+        h,i`.replace(/\r?\n/, '');
+    const replace = singleRule(/.+/g, 
+        new Ruleset(Which.All, 
+            { find: /^/g, replace: new Proc('-1 "i" setvar drop') },
+            { find: /[^,]+/g, replace: new Proc('"i" getvar 1 + "i" setvar 1 = not when') },
+            { find: ',', replace: new Proc('"i" getvar 0 = not when')}));
+    const expected = `
+        a,c
+        d,f,g
+        h`.replace(/\r?\n/, '');
+    testCase(input, replace, expected);
+}
