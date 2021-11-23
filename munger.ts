@@ -1,6 +1,5 @@
 type Locator = string | RegExp;
-export type Replacement = string | Ruleset | Proc;
-export type Munger = Repeater | Sequence | Replacement
+export type Munger = string | Ruleset | Proc| Repeater | Sequence 
 
 export enum Which { FirstOnly, All }
 
@@ -9,9 +8,6 @@ type Context = {
     arrays: Map<string, string[]>;
     procs: ReadonlyMap<string, Proc>;
 };
-function makeContext(): Context {
-    return { registers: new Map, arrays: new Map, procs: new Map };
-}
 
 export class Proc {
     private instructions: string[];
@@ -113,22 +109,13 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
         if (!locator.global) throw "gotta be global";
         locator.lastIndex = start;
         const match = locator.exec(input);
-        if (match) {
-            return {
-                index: match.index,
-                value: match[0],
-                groups: match.slice(1),
-            };
-        }
+        if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
     }
 }
 
-function makeFlatMatch(input: string) {
-    return { index: 0, value: input, groups: [] };
-}
-
 export function munge(input: string, munger: Munger) {
-    return mungeCore(makeFlatMatch(input), munger, makeContext());
+    const newContext = { registers: new Map, arrays: new Map, procs: new Map };
+    return mungeCore({ value: input, groups: [], index: 0 }, munger, newContext);
 }
 
 function mungeCore(input: Match, munger: Munger, ctx: Context): string {
@@ -137,7 +124,7 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
     else return munger.apply(input, ctx);
 }
 
-type Rule = { find: Locator, replace: Replacement };
+type Rule = { find: Locator, replace: Munger };
 export class Ruleset {
     rules: Rule[];
     which: Which;
@@ -148,22 +135,20 @@ export class Ruleset {
     }
 
     apply(input: Match, ctx: Context): string {
-        let startOfMatch = -1, endOfMatch = 0, patternIndex = -1, output: string[] = [];
+        let startOfMatch = -1, endOfMatch = 0, ruleIndex = -1, output: string[] = [];
         for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
-            let matches = this.rules
-                .map((r, index) => {
+            let matches = this.rules.map((r, index) => {
                     let startIndex = endOfMatch;
-                    if (startOfMatch === startIndex && index <= patternIndex) ++startIndex;
+                    if (startOfMatch === startIndex && index <= ruleIndex) ++startIndex;
                     return { index, match: nextMatch(input.value, startIndex, r.find) };
-                })
-                .filter(m => m.match != null);
+                }).filter(m => m.match);
             if (matches.length === 0) break;
             
             let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
             if (!match) break;
             
-            patternIndex = index;
-            let { replace } = this.rules[patternIndex];
+            ruleIndex = index;
+            let { replace } = this.rules[ruleIndex];
 
             output.push(
                 input.value.substring(endOfMatch, match.index),
@@ -184,7 +169,7 @@ export const noop = new Ruleset(Which.All);
 Object.freeze(noop);
 Object.freeze(noop.rules);
 
-export function singleRule(find: Locator, replace: Replacement) {
+export function singleRule(find: Locator, replace: Munger) {
     return new Ruleset(Which.All, { find, replace });
 }
 

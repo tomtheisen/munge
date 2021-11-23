@@ -259,3 +259,15 @@ function testCase(input: string, munger: Munger, expected: string) {
     const expected = "26";
     testCase(input, replace, expected);
 }
+
+{
+    const input = "2 * (3 + 4) * 5";
+    const replace = new Sequence(Which.FirstOnly,
+        singleRule(/\(\d+\)/g, singleRule(/\(|\)/g, '')),
+        singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
+        singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),
+    ).repeat();
+    const expected = "70";
+    testCase(input, replace, expected);
+}
+
