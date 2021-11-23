@@ -1,6 +1,6 @@
 type Locator = string | RegExp;
-export type Munger = string | Ruleset | Proc| Repeater | Sequence 
-
+type Rule = { find: Locator, replace: Munger };
+export type Munger = string | Ruleset | Proc| Repeater | Sequence;
 export enum Which { FirstOnly, All }
 
 type Context = {
@@ -124,7 +124,6 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
     else return munger.apply(input, ctx);
 }
 
-type Rule = { find: Locator, replace: Munger };
 export class Ruleset {
     rules: Rule[];
     which: Which;
