@@ -53,7 +53,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 }
 
 {
-    const multipleTester = new Sequence(
+    const multipleTester = new Sequence(Which.All,
         new Ruleset(Which.All,
             { find: /[0369]/g, replace: "" },
             { find: /[47]/g, replace: "1" },
@@ -74,7 +74,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 }
 
 {
-    const multipleTester = new Sequence(
+    const multipleTester = new Sequence(Which.All,
         new Ruleset(Which.FirstOnly,
             { find: /[02468]$/g, replace: new Ruleset(Which.FirstOnly, { find: /$/g, replace: "even" }) }
         ),
@@ -116,7 +116,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "2,11,5,4,3";
-    const replace = new Sequence(
+    const replace = new Sequence(Which.All,
         new Ruleset(Which.All,
             { find: /\d+/g, replace: new Proc('_ "m" get max "m" set drop') },
             { find: ',', replace: '' }),
@@ -135,7 +135,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "3,2,5,4,11,3";
-    const replace = new Sequence(
+    const replace = new Sequence(Which.All,
         singleRule(/\d+/g, new Proc('_ "m" get max "m" set _')),
         singleRule(/\d+/g, new Proc('"m" get')));
     const expected = "11,11,11,11,11,11";
@@ -147,7 +147,7 @@ function testCase(input: string, munger: Munger, expected: string) {
         a
         bbbb
         cc`.replace(/\r?\n/, '');
-    const replace = new Sequence(
+    const replace = new Sequence(Which.All,
         singleRule(/.+/g, new Proc('_ len "maxlen" get max "maxlen" set drop _')),
         singleRule(/.+/g, new Proc('_ "maxlen" get lpad')));
     const expected = `
@@ -213,5 +213,49 @@ function testCase(input: string, munger: Munger, expected: string) {
     </inner>
 </outer>
 `.trimStart();
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "a,b,c"
+    const replace = singleRule(/\w+/g, new Proc('get(x) _ cat set(x)'))
+    const expected = "a,ab,abc";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "0x100 is two five six while 0xffff is six five five three six, 0xDEAD";
+    const replace = singleRule(/0x[0-9a-f]+/ig, new Ruleset(Which.All,
+        { find: '0x', replace: new Proc('0 set(h) clear') },
+        { find: /./g, replace: new Proc('get(h) 16 * "0123456789abcdef" _ lower index + set(h) clear') },
+        { find: /$/g, replace: new Proc('get(h)') }));
+    const expected = "256 is two five six while 65535 is six five five three six, 57005";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "pre 7 * 8 post";
+    const replace = singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *'));
+    const expected = "pre 56 post";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "3 + 4 * 5";
+    const replace = new Sequence(Which.FirstOnly,
+        singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
+        singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),
+    );
+    const expected = "3 + 20";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "2 * 3 + 4 * 5";
+    const replace = new Sequence(Which.FirstOnly,
+        singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
+        singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),
+    ).repeat();
+    const expected = "26";
     testCase(input, replace, expected);
 }

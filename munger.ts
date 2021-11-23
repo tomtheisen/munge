@@ -21,7 +21,7 @@ export class Proc {
             .map(m => m[0]);
     }
 
-    evaluate(input: string, ctx: Context): string {
+    evaluate(input: Match, ctx: Context): string {
         let stack: string[] = [];
         function push(...es: (string | number)[]) {
             for (let e of es) {
@@ -36,21 +36,29 @@ export class Proc {
             return stack[depth ?? 0] ?? "";
         }
 
-        for (let instr of this.instructions) {
+        const instructions = this.instructions.slice();
+        let instr, match: RegExpExecArray | null;
+        while (instr = instructions.shift()) {
             if (/^-?\d+$/.test(instr)) push(instr);
-            else if (instr.startsWith('"')) {
-                push(instr.substring(1, instr.length - 1));
+            else if (instr.startsWith('"')) push(instr.substring(1, instr.length - 1));
+            else if (match = /^(set|get)\((\w+)\)$/.exec(instr)) {
+                instructions.unshift(JSON.stringify(match[2]), match[1]);
+            }
+            else if (match = /^\$(\d+)$/.exec(instr)) {
+                instructions.unshift(JSON.stringify(match[1]), "group");
             }
             else switch (instr) {
-                case '_': push(input); break;
+                case '_': push(input.value); break;
                 case 'nl': push("\n"); break;
                 case 'len': push(pop().length); break;
                 case 'swap': push(pop(), pop()); break;
                 case 'copy': push(peek()); break;
                 case 'drop': pop(); break;
-                case 'cat': push(pop(1) + pop()); break;
-                case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
-                case 'lpad': push(pop(1).padStart(Number(pop()))); break;
+                case 'clear': stack.splice(0); break;
+                case 'dump': console.log({ instructions, stack }); break;
+
+                case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
+
                 case 'max': stack.length >= 2 && push(Math.max(Number(pop()), Number(pop()))); break;
                 case 'min': stack.length >= 2 && push(Math.min(Number(pop()), Number(pop()))); break;
                 case '>': push(pop(1) > pop() ? 1 : 0); break;
@@ -58,16 +66,26 @@ export class Proc {
                 case '=': push(pop() == pop() ? 1 : 0); break;
                 case '+': push(Number(pop()) + Number(pop())); break;
                 case '-': push(Number(pop(1)) - Number(pop())); break;
+                case '%': push(Number(pop(1)) % Number(pop())); break;
+                case '*': push(Number(pop()) * Number(pop())); break;
+                case '/': push(Number(pop(1)) / Number(pop())); break;
                 case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                 case 'not': push(Number(pop()) ? 0 : 1); break;
                 case 'if': push(Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
                 case 'when': Number(pop()) || (pop(), push("")); break;
 
+                case 'cat': push(pop(1) + pop()); break;
+                case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
+                case 'lpad': push(pop(1).padStart(Number(pop()))); break;
+                case 'index': push(pop(1).indexOf(pop())); break;
+                case 'lower': push(pop().toLowerCase()); break;
+                case 'upper': push(pop().toUpperCase()); break;
+
                 case 'set': ctx.registers.set(pop(), peek()); break;
                 case 'get': push(ctx.registers.get(pop()) ?? ""); break;
 
-                case 'push': ctx.arrays.get(pop())?.push(pop());
+                case 'push': ctx.arrays.get(pop())?.push(pop()); break;
                 
                 default: throw "unrecognized instruction " + instr;
             }
@@ -105,11 +123,15 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
     }
 }
 
-export function munge(input: string, munger: Munger) {
-    return mungeCore(input, munger, makeContext());
+function makeFlatMatch(input: string) {
+    return { index: 0, value: input, groups: [] };
 }
 
-function mungeCore(input: string, munger: Munger, ctx: Context): string {
+export function munge(input: string, munger: Munger) {
+    return mungeCore(makeFlatMatch(input), munger, makeContext());
+}
+
+function mungeCore(input: Match, munger: Munger, ctx: Context): string {
     if (typeof munger === 'string') return munger;
     else if (munger instanceof Proc) return munger.evaluate(input, ctx);
     else return munger.apply(input, ctx);
@@ -125,14 +147,14 @@ export class Ruleset {
         this.rules = rules;
     }
 
-    apply(input: string, ctx: Context): string {
+    apply(input: Match, ctx: Context): string {
         let startOfMatch = -1, endOfMatch = 0, patternIndex = -1, output: string[] = [];
-        for (let matchCount = 0; endOfMatch <= input.length; ++matchCount) {
+        for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
             let matches = this.rules
                 .map((r, index) => {
                     let startIndex = endOfMatch;
                     if (startOfMatch === startIndex && index <= patternIndex) ++startIndex;
-                    return { index, match: nextMatch(input, startIndex, r.find) };
+                    return { index, match: nextMatch(input.value, startIndex, r.find) };
                 })
                 .filter(m => m.match != null);
             if (matches.length === 0) break;
@@ -144,14 +166,14 @@ export class Ruleset {
             let { replace } = this.rules[patternIndex];
 
             output.push(
-                input.substring(endOfMatch, match.index),
-                mungeCore(match.value, replace, ctx));
+                input.value.substring(endOfMatch, match.index),
+                mungeCore(match, replace, ctx));
             startOfMatch = match.index;
             endOfMatch = match.index + match.value.length;
 
             if (this.which === Which.FirstOnly) break;
         }
-        return output.join('') + input.substring(endOfMatch);
+        return output.join('') + input.value.substring(endOfMatch);
     }
 
     repeat() {
@@ -173,25 +195,36 @@ export class Repeater {
         this.munger = munger;
     }
 
-    apply(input: string, ctx: Context): string {
-        while (true) {
-            const output = mungeCore(input, this.munger, ctx);
-            if (output === input) break;
-            input = output;
+    apply(input: Match, ctx: Context): string {
+        let last = input.value, output = mungeCore(input, this.munger, ctx), i = 0;
+        while (last !== output) {
+            last = output;
+            output = mungeCore({ value: output, groups: [], index: i++ }, this.munger, ctx);
         }
-        return input;
+        return output;
     }
 }
 
 export class Sequence {
     steps: Munger[];
+    which: Which;
 
-    constructor(...steps: Munger[]) {
+    constructor(which: Which, ...steps: Munger[]) {
+        this.which = which;
         this.steps = steps;
     }
 
-    apply(input: string, ctx: Context): string {
-        for (let munger of this.steps) input = mungeCore(input, munger, ctx);
+    apply(match: Match, ctx: Context): string {
+        let input = match.value, i = 0;
+        for (let munger of this.steps) {
+            let next = mungeCore({ value: input, groups: [], index: i++ }, munger, ctx);
+            if (this.which === Which.FirstOnly && next !== input) return next;
+            input = next;
+        }
         return input;
+    }
+
+    repeat() {
+        return new Repeater(this);
     }
 }
