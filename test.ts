@@ -109,7 +109,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "abcd";
-    const replace = new Proc('len');
+    const replace = new Proc('_ len');
     const expected = "4";
     testCase(input, replace, expected);
 }
@@ -118,9 +118,9 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "2,11,5,4,3";
     const replace = new Sequence(
         new Ruleset(Which.All,
-            { find: /\d+/g, replace: new Proc('"m" getvar max "m" setvar drop') },
+            { find: /\d+/g, replace: new Proc('_ "m" get max "m" set drop') },
             { find: ',', replace: '' }),
-        new Proc('"m" getvar')
+        new Proc('"m" get')
     );
     const expected = "11";
     testCase(input, replace, expected);
@@ -128,7 +128,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "3,2,5,4,11,3";
-    const replace = singleRule(/\d+/g, new Proc('"m" getvar max "m" setvar'));
+    const replace = singleRule(/\d+/g, new Proc('_ "m" get max "m" set'));
     const expected = "3,3,5,5,11,11";
     testCase(input, replace, expected);
 }
@@ -136,8 +136,8 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "3,2,5,4,11,3";
     const replace = new Sequence(
-        singleRule(/\d+/g, new Proc('"m" getvar max "m" setvar drop _')),
-        singleRule(/\d+/g, new Proc('drop "m" getvar')));
+        singleRule(/\d+/g, new Proc('_ "m" get max "m" set _')),
+        singleRule(/\d+/g, new Proc('"m" get')));
     const expected = "11,11,11,11,11,11";
     testCase(input, replace, expected);
 }
@@ -148,8 +148,8 @@ function testCase(input: string, munger: Munger, expected: string) {
         bbbb
         cc`.replace(/\r?\n/, '');
     const replace = new Sequence(
-        singleRule(/.+/g, new Proc('len "maxlen" getvar max "maxlen" setvar drop _')),
-        singleRule(/.+/g, new Proc('"maxlen" getvar lpad')));
+        singleRule(/.+/g, new Proc('_ len "maxlen" get max "maxlen" set drop _')),
+        singleRule(/.+/g, new Proc('_ "maxlen" get lpad')));
     const expected = `
            a
         bbbb
@@ -164,9 +164,9 @@ function testCase(input: string, munger: Munger, expected: string) {
         h,i`.replace(/\r?\n/, '');
     const replace = singleRule(/.+/g, 
         new Ruleset(Which.All, 
-            { find: /^/g, replace: new Proc('-1 "i" setvar drop') },
-            { find: /[^,]+/g, replace: new Proc('"i" getvar 1 + "i" setvar 1 = not when') },
-            { find: ',', replace: new Proc('"i" getvar 0 = not when')}));
+            { find: /^/g, replace: new Proc('-1 "i" set drop _') },
+            { find: /[^,]+/g, replace: new Proc('_ "i" get 1 + "i" set 1 = not when') },
+            { find: ',', replace: new Proc('_ "i" get 0 = not when')}));
     const expected = `
         a,c
         d,f,g
@@ -176,7 +176,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "a";
-    const replace = singleRule('a', new Proc('drop "\n"'));
+    const replace = singleRule('a', new Proc('"\n"'));
     const expected = "\n";
     testCase(input, replace, expected);
 }
@@ -184,9 +184,9 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "<outer><inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
-        { find: /<\w+>/g, replace: new Proc('drop " " "indent" getvar rep "indent" getvar 4 + "indent" setvar drop _ "\n"') },
-        { find: /<\/\w+>/g, replace: new Proc('drop " " "indent" getvar 4 - "indent" setvar rep _ "\n"') },
-        { find: /<\w+\/>/g, replace: new Proc('drop " " "indent" getvar rep _ "\n"') });
+        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\n"') },
+        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\n"') },
+        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\n"') });
     const expected = `
 <outer>
     <inner/>
@@ -202,9 +202,9 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "<outer>                             <inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
         { find: /\s+/g, replace: '' },
-        { find: /<\w+>/g, replace: new Proc('drop " " "indent" getvar rep "indent" getvar 4 + "indent" setvar drop _ "\n"') },
-        { find: /<\/\w+>/g, replace: new Proc('drop " " "indent" getvar 4 - "indent" setvar rep _ "\n"') },
-        { find: /<\w+\/>/g, replace: new Proc('drop " " "indent" getvar rep _ "\n"') });
+        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\n"') },
+        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\n"') },
+        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\n"') });
     const expected = `
 <outer>
     <inner/>

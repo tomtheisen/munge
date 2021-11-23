@@ -22,7 +22,7 @@ export class Proc {
     }
 
     evaluate(input: string, ctx: Context): string {
-        let stack: string[] = [input];
+        let stack: string[] = [];
         function push(...es: (string | number)[]) {
             for (let e of es) {
                 stack.unshift(typeof e === 'string' ? e : e.toString());   
@@ -63,8 +63,8 @@ export class Proc {
                 case 'if': push(Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
                 case 'when': Number(pop()) || (pop(), push("")); break;
 
-                case 'setvar': ctx.registers.set(pop(), peek()); break;
-                case 'getvar': push(ctx.registers.get(pop()) ?? ""); break;
+                case 'set': ctx.registers.set(pop(), peek()); break;
+                case 'get': push(ctx.registers.get(pop()) ?? ""); break;
 
                 case 'push': ctx.arrays.get(pop())?.push(pop());
                 
