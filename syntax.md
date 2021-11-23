@@ -8,16 +8,16 @@ export enum Which { FirstOnly, All }
 * Mungers
     * String `"foo"`
     * Ruleset 
-        * All `input ( )`
-        * FirstOnly `first input ( )`
+        * All `doc ( )` short: `( )`
+        * FirstOnly `first doc ( )` short: `1( )`
         * Locator
             * String `"foo"`
             * Regexp `/bar/`
         * Munger
     * Sequence
-        * All `rule ( )`
-        * FirstOnly `first rule ( )`
-    * Repeater `rep ...`
+        * All `seq ( )` short: `#( )`
+        * FirstOnly `first seq ( )` short: `1#( )`
+    * Repeater `stabilize ...` short: `@ ...`
     * Proc `{ get(x) "lol" }`
 
 ```
