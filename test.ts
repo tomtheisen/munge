@@ -184,9 +184,9 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "<outer><inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
-        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\n"') },
-        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\n"') },
-        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\n"') });
+        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
+        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
+        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
     const expected = `
 <outer>
     <inner/>
@@ -202,9 +202,9 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "<outer>                             <inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
         { find: /\s+/g, replace: '' },
-        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\n"') },
-        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\n"') },
-        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\n"') });
+        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
+        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
+        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
     const expected = `
 <outer>
     <inner/>

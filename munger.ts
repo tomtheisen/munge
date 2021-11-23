@@ -43,9 +43,10 @@ export class Proc {
             }
             else switch (instr) {
                 case '_': push(input); break;
+                case 'nl': push("\n"); break;
                 case 'len': push(pop().length); break;
                 case 'swap': push(pop(), pop()); break;
-                case 'copy': push(peek(), peek()); break;
+                case 'copy': push(peek()); break;
                 case 'drop': pop(); break;
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
