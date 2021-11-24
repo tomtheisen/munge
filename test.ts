@@ -2,7 +2,7 @@ import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, noop } from 
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
-    const actual = munge(input, munger);
+    const actual = munge(input, munger, new Map);
     const success = expected == actual;
     if (success) console.log(`\x1b[1A\x1b[K${++tests} good`);
     else {

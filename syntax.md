@@ -4,24 +4,29 @@ type Rule = { find: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc| Repeater | Sequence;
 export enum Which { FirstOnly, All }
 ```
-
+* Comments `! comment here`
 * Mungers
     * String `"foo"`
     * Ruleset 
-        * All `doc ( )` short: `( )`
-        * FirstOnly `first doc ( )` short: `1( )`
+        * All `( )`
+        * FirstOnly `1( )`
+        * Sequence All `#( )`
+        * Sequence FirstOnly `1#( )`
         * Locator
             * String `"foo"`
             * Regexp `/bar/`
         * Munger
-    * Sequence
-        * All `seq ( )` short: `#( )`
-        * FirstOnly `first seq ( )` short: `1#( )`
-    * Repeater `stabilize ...` short: `@ ...`
     * Proc `{ get(x) "lol" }`
+        * Reference `munger(name)` defined by `define(name) ...`
+    * Decorators
+        * Repeater `@ ...`
+        * Side-effect `fx ...`
+        * Consume `eat ...`
+* Named proc `define(name) ....`
+
 
 ```
-input (
+(
     "foo" => "bar",
     /bar/ => { len },
 )

@@ -1,20 +1,25 @@
-type Locator = string | RegExp;
-type Rule = { find: Locator, replace: Munger };
+export type Locator = string | RegExp;
+export type Rule = { find: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc| Repeater | Sequence;
 export enum Which { FirstOnly, All }
 
 type Context = {
     registers: Map<string, string>;
     arrays: Map<string, string[]>;
-    procs: ReadonlyMap<string, Proc>;
+    mungers: ReadonlyMap<string, Munger>;
 };
 
 export class Proc {
     private instructions: string[];
-    constructor(instructions: string) {
-        this.instructions = Array
-            .from(instructions.matchAll(/".*?"|\S+/sg))
-            .map(m => m[0]);
+    constructor(instructions: string | string[]) {
+        if (typeof instructions === "string") {
+            this.instructions = Array
+                .from(instructions.matchAll(/".*?"|\S+/sg))
+                .map(m => m[0]);
+        }
+        else {
+            this.instructions = instructions;
+        }
     }
 
     evaluate(input: Match, ctx: Context): string {
@@ -113,8 +118,8 @@ function nextMatch(input: string, start: number, locator: Locator): Match | unde
     }
 }
 
-export function munge(input: string, munger: Munger) {
-    const newContext = { registers: new Map, arrays: new Map, procs: new Map };
+export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger>) {
+    const newContext = { registers: new Map, arrays: new Map, mungers };
     return mungeCore({ value: input, groups: [], index: 0 }, munger, newContext);
 }
 
