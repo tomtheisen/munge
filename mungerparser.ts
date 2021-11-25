@@ -56,8 +56,16 @@ export function parse(source: string): Munger {
         if (match) return new RegExp(match[1], match[2] + 'g');
     }
 
+    const Wholesale = /all/y;
+    function parseWholesale(): RegExp | undefined {
+        if (!tryParse(Wholesale)) return undefined;
+        return /^.*/gs;
+    }
+
     function parseLocator(): Locator | undefined {
-        return parseSingleStringLiteral() ?? parseRegExpLiteral();
+        return parseSingleStringLiteral() 
+            ?? parseRegExpLiteral()
+            ?? parseWholesale();
     }
 
     const GoesTo = /=>/y;

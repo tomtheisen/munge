@@ -1,4 +1,4 @@
 #(
     /.+/ => { _ cons(lines) }
-    /^.*/s => { "\n" join(lines) }
+    all => { "\n" join(lines) }
 )
