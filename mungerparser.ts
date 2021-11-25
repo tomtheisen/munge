@@ -50,7 +50,7 @@ export function parse(source: string): Munger {
         if (match) return match[1].replace(/\\(.)/g, "$1");
     }
 
-    const RegExpLiteral = /\/((?:[^\\\n]|\\.)+)\/([ism]*)/y;
+    const RegExpLiteral = /\/((?:[^\\\n/]|\\.)+)\/([ism]*)/y;
     function parseRegExpLiteral(): RegExp | undefined {
         let match = tryParse(RegExpLiteral);
         if (match) return new RegExp(match[1], match[2] + 'g');
@@ -103,7 +103,7 @@ export function parse(source: string): Munger {
     }
 
     const ProcOpen = /{/y;
-    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?!["}])\S+/y;
+    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?:(?!["}])\S)+/y;
     const ProcClose = /}/y;
     function parseProc(): Proc | undefined {
         if (!tryParse(ProcOpen)) return undefined;
