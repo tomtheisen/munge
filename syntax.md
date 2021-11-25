@@ -16,6 +16,7 @@ export enum Which { FirstOnly, All }
         * Locator
             * String `'foo'`
             * Regexp `/bar/[ism]*`
+            * Wholesale `all`
         * Munger
     * Last `last(rule)`
     * Proc `{ get(x) "lol" }`

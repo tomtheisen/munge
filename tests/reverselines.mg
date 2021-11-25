@@ -1,5 +1,4 @@
 #(
-    /.+/ => eat { _ push(lines) }
-    ""
-    /(?:)/ => { rev(lines) "\n" join(lines) }
+    /.+/ => { _ cons(lines) }
+    /^.*/s => { "\n" join(lines) }
 )

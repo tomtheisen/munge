@@ -67,7 +67,7 @@ export class Proc {
         while (instr = instructions.shift()) {
             if (/^-?\d+$/.test(instr)) push(instr);
             else if (instr.startsWith('"')) push(JSON.parse(instr));
-            else if (match = /^(set|get|push|join|rev)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|pop|cons|uncons|join|rev)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -117,6 +117,14 @@ export class Proc {
                     ctx.arrays.get(name)!.push(pop()); 
                     break;
                 }
+                case 'pop': push(ctx.arrays.get(pop())?.pop() ?? ""); break;
+                case 'cons': {
+                    const name = pop();
+                    if (!ctx.arrays.has(name)) ctx.arrays.set(name, []);
+                    ctx.arrays.get(name)!.unshift(pop()); 
+                    break;
+                }
+                case 'uncons': push(ctx.arrays.get(pop())?.shift() ?? ""); break;
                 case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
                 case 'rev': ctx.arrays.get(pop())?.reverse(); break;
                 
