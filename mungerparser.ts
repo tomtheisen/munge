@@ -1,12 +1,31 @@
-import { Locator, Munger, Proc, Rule, Ruleset, Sequence, Which } from './munger.js';
+import { exit } from 'process';
+import { Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, Which } from './munger.js';
 
 export function parse(source: string): Munger {
     let consumed = 0;
 
+    const Upcoming = /.*/y;
+    function fail(message: string): never {
+        const sofar = source.substring(0, consumed);
+        let line = 1, col = 1;
+        for (let nl of sofar.matchAll(/\n/g)) {
+            if (nl.index == null) throw Error("Internal error: RegExp match doesn't have index");
+            if (nl.index > consumed) break;
+            ++line;
+            col = consumed - nl.index + 1;
+        }
+
+        console.error(`${ line }:${ col } ` + message);
+        Upcoming.lastIndex = consumed;
+        const upcoming = Upcoming.exec(source);
+        if (upcoming) console.error(`Upcoming: ` + upcoming[0]);
+        exit(1);
+    }
+
     const WhiteSpaceAndComments = /(?:\s|!.*)+/y;
     // no backtracking
     function tryParse(tokenPattern: RegExp): RegExpExecArray | undefined {
-        if (!tokenPattern.sticky) throw `Token pattern ${tokenPattern} not sticky.`;
+        if (!tokenPattern.sticky) fail(`Token pattern ${tokenPattern} not sticky.`);
 
         WhiteSpaceAndComments.lastIndex = consumed;
         consumed += WhiteSpaceAndComments.exec(source)?.[0].length ?? 0;
@@ -39,9 +58,9 @@ export function parse(source: string): Munger {
     function parseRule(): Rule | undefined {
         let find = parseLocator();
         if (find == null) return undefined;
-        if (!tryParse(GoesTo)) throw `Expected '=>' at ${consumed}`;
+        if (!tryParse(GoesTo)) fail(`Expected '=>'`);
         let replace = parseMunger();
-        if (replace == null) throw `Expected rule munger at ${consumed}`;
+        if (replace == null) fail(`Expected rule munger`);
         return { find, replace };
     }
 
@@ -53,7 +72,7 @@ export function parse(source: string): Munger {
 
         let rules: Rule[] = [], rule: Rule | undefined;
         while (rule = parseRule()) rules.push(rule);
-        if (!tryParse(RulesetClose)) throw `Expected ')' at ${consumed}`;
+        if (!tryParse(RulesetClose)) fail(`Expected ')'`);
         
         return new Ruleset(open[1] ? Which.FirstOnly : Which.All, ...rules);
     }
@@ -66,7 +85,7 @@ export function parse(source: string): Munger {
 
         let mungers: Munger[] = [], munger: Munger | undefined;
         while (munger = parseMunger()) mungers.push(munger);
-        if (!tryParse(SequenceClose)) throw `Expected ')' at ${consumed}`;
+        if (!tryParse(SequenceClose)) fail(`Expected ')'`);
         
         return new Sequence(open[1] ? Which.FirstOnly : Which.All, ...mungers);
     }
@@ -78,18 +97,27 @@ export function parse(source: string): Munger {
         if (!tryParse(ProcOpen)) return undefined;
         let instructions: string[] = [], match: RegExpExecArray | undefined;
         while (match = tryParse(ProcInstruction)) instructions.push(match[0]);
-        if (!tryParse(ProcClose)) throw `Expected '}' at ${consumed}`;
+        if (!tryParse(ProcClose)) fail(`Expected '}'`);
         return new Proc(instructions);
+    }
+
+    const RepeaterPrefix = /@/y;
+    function parseRepeater(): Repeater | undefined {
+        if (!tryParse(RepeaterPrefix)) return undefined;
+        const munger = parseMunger();
+        if (munger == null) fail(`Expected munger after @`);
+        return new Repeater(munger);
     }
 
     function parseMunger(): Munger | undefined {
         return parseStringLiteral()
             ?? parseRuleset()
             ?? parseSequence()
+            ?? parseRepeater()
             ?? parseProc();
     }
 
     const result = parseMunger();
-    if (result == null) throw `Expected munger definition at ${consumed}`;
+    if (result == null) fail(`Expected munger definition`);
     return result;
 }
