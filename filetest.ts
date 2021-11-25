@@ -32,6 +32,7 @@ for (const file of readdirSync(folder)) {
         continue;
     }
 
-    if (expected !== output) console.dir({ output, expected });
+    if (expected === output) console.log("Output matches");
+    else console.dir({ ast, output, expected }, { depth: null });
 }
 

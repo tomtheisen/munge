@@ -1,4 +1,5 @@
 import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, noop } from './munger.js';
+import { parse } from './mungerparser.js';
 
 let tests = 0;
 function testCase(input: string, munger: Munger, expected: string) {
@@ -270,3 +271,9 @@ function testCase(input: string, munger: Munger, expected: string) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = "x123y";
+    const replace = parse(`( /(\\d+)/ => "" )`);
+    const expected = "xy";
+    testCase(input, replace, expected);
+}
