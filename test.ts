@@ -284,3 +284,10 @@ function testCase(input: string, munger: Munger, expected: string) {
     const expected = "axbxcyd";
     testCase(input, replace, expected);
 }
+
+{
+    const input = "abc";
+    const replace = parse('#( "" )');
+    const expected = "";
+    testCase(input, replace, expected);
+}

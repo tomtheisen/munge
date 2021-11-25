@@ -96,7 +96,7 @@ export function parse(source: string): Munger {
         if (!open) return undefined;
 
         let mungers: Munger[] = [], munger: Munger | undefined;
-        while (munger = parseMunger()) mungers.push(munger);
+        while ((munger = parseMunger()) != null) mungers.push(munger);
         if (!tryParse(SequenceClose)) fail(`Expected munger or ')'`);
         
         return new Sequence(open[1] ? Which.FirstOnly : Which.All, ...mungers);

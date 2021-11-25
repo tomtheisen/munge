@@ -67,7 +67,7 @@ export class Proc {
         while (instr = instructions.shift()) {
             if (/^-?\d+$/.test(instr)) push(instr);
             else if (instr.startsWith('"')) push(JSON.parse(instr));
-            else if (match = /^(set|get)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|join|rev)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -81,7 +81,7 @@ export class Proc {
                 case 'copy': push(peek()); break;
                 case 'drop': pop(); break;
                 case 'clear': stack.splice(0); break;
-                case 'dump': console.log({ instructions, stack }); break;
+                case 'dump': console.log({ instructions, stack, ctx }); break;
 
                 case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
 
@@ -111,7 +111,14 @@ export class Proc {
                 case 'set': ctx.registers.set(pop(), peek()); break;
                 case 'get': push(ctx.registers.get(pop()) ?? ""); break;
 
-                case 'push': ctx.arrays.get(pop())?.push(pop()); break;
+                case 'push': {
+                    const name = pop();
+                    if (!ctx.arrays.has(name)) ctx.arrays.set(name, []);
+                    ctx.arrays.get(name)!.push(pop()); 
+                    break;
+                }
+                case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
+                case 'rev': ctx.arrays.get(pop())?.reverse(); break;
                 
                 default: throw "unrecognized instruction " + instr;
             }
