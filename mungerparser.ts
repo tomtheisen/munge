@@ -117,14 +117,23 @@ export function parse(source: string): Munger {
     function parseRepeater(): Repeater | undefined {
         if (!tryParse(RepeaterPrefix)) return undefined;
         const munger = parseMunger();
-        if (munger == null) fail(`Expected munger after @`);
+        if (munger == null) fail(`Expected munger after '@' decorator`);
         return new Repeater(munger);
+    }
+
+    const EatPrefix = /eat\b/y;
+    function parseEater(): Sequence | undefined {
+        if (!tryParse(EatPrefix)) return undefined;
+        const munger = parseMunger();
+        if (munger == null) fail(`Expected munger after 'eat' decorator`);
+        return new Sequence(Which.All, munger, "");
     }
 
     function parseMunger(): Munger | undefined {
         return parseRuleset()
             ?? parseSequence()
             ?? parseRepeater()
+            ?? parseEater()
             ?? parseProc()
             ?? parseSingleRule()
             ?? parseDoubleStringLiteral();

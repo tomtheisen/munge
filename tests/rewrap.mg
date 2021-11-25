@@ -1,5 +1,5 @@
 #(
-    /\r/ => { _ set(r) clear }
+    /\r/ => eat { _ set(r) }
     /[ \t]+$/m => ""
     ( ! join para lines
         /\n{2,}/ => () ! noop
