@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, singleRule, Which } from './munger.js';
+import { Last, Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, singleRule, Which } from './munger.js';
 
 export function parse(source: string): Munger {
     let consumed = 0;
@@ -67,7 +67,7 @@ export function parse(source: string): Munger {
         if (!tryParse(GoesTo)) fail(`Expected '=>'`);
         let replace = parseMunger();
         if (replace == null) fail(`Expected rule munger`);
-        return { find, replace };
+        return { locator: find, replace };
     }
 
     function parseSingleRule(): Ruleset | undefined {
@@ -129,10 +129,21 @@ export function parse(source: string): Munger {
         return new Sequence(Which.All, munger, "");
     }
 
+    const LastOpen = /last\s*\(/y;
+    const LastClose = /\)/y;
+    function parseLast(): Last | undefined {
+        if (!tryParse(LastOpen)) return undefined;
+        const rule = parseRule();
+        if (rule == null) fail(`Expected rule after 'last('`);
+        if (!tryParse(LastClose)) fail(`Expected ')' to close 'last('`);
+        return new Last(rule);
+    }
+
     function parseMunger(): Munger | undefined {
         return parseRuleset()
             ?? parseSequence()
             ?? parseRepeater()
+            ?? parseLast()
             ?? parseEater()
             ?? parseProc()
             ?? parseSingleRule()

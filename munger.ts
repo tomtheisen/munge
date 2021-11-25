@@ -1,6 +1,6 @@
 export type Locator = string | RegExp;
-export type Rule = { find: Locator, replace: Munger };
-export type Munger = string | Ruleset | Proc| Repeater | Sequence;
+export type Rule = { locator: Locator, replace: Munger };
+export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last;
 export enum Which { FirstOnly, All }
 
 type Context = {
@@ -18,11 +18,7 @@ type Match = {
 function nextMatch(input: string, start: number, locator: Locator): Match | undefined {
     if (typeof locator === 'string') {
         const index = start > input.length ? -1 : input.indexOf(locator, start);
-        if (index >= 0) return {
-            index,
-            value: locator,
-            groups: []
-        };
+        if (index >= 0) return { index, value: locator, groups: [] };
     }
     if (locator instanceof RegExp) {
         if (!locator.global) throw "gotta be global";
@@ -145,7 +141,7 @@ export class Ruleset {
             let matches = this.rules.map((r, index) => {
                     let startIndex = endOfMatch;
                     if (startOfMatch === startIndex && index <= ruleIndex) ++startIndex;
-                    return { index, match: nextMatch(input.value, startIndex, r.find) };
+                    return { index, match: nextMatch(input.value, startIndex, r.locator) };
                 }).filter(m => m.match);
             if (matches.length === 0) break;
             
@@ -170,12 +166,9 @@ export class Ruleset {
         return new Repeater(this);
     }
 }
-export const noop = new Ruleset(Which.All);
-Object.freeze(noop);
-Object.freeze(noop.rules);
 
 export function singleRule(find: Locator, replace: Munger) {
-    return new Ruleset(Which.All, { find, replace });
+    return new Ruleset(Which.All, { locator: find, replace });
 }
 
 export class Repeater {
@@ -216,5 +209,32 @@ export class Sequence {
 
     repeat() {
         return new Repeater(this);
+    }
+}
+
+export class Last {
+    rule: Rule;
+    constructor(rule: Rule) {
+        this.rule = rule;
+    }
+
+    apply(match: Match, ctx: Context): string {
+        const input = match.value;
+        let lastMatch: Match | undefined = undefined;
+        let lastMatchPosition : number | undefined = undefined;
+
+        if (typeof this.rule.locator === "string") {
+            lastMatchPosition = input.lastIndexOf(this.rule.locator);
+            if (lastMatchPosition >= 0) lastMatch = { value: this.rule.locator, groups: [], index: 0 };
+        }
+        else for (let m of input.matchAll(this.rule.locator)) {
+            lastMatchPosition = m.index;
+            lastMatch = { value: m[0], groups: m.slice(1), index: 0 };
+        }
+
+        if (!lastMatch || lastMatchPosition == null) return input;
+        return input.substring(0, lastMatchPosition) 
+            + mungeCore(lastMatch, this.rule.replace, ctx)
+            + input.substring(lastMatchPosition + lastMatch.value.length);
     }
 }

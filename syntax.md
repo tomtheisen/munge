@@ -1,4 +1,3 @@
-What about last decorator for locator?
 
 ```
 type Locator = string | RegExp;
@@ -18,6 +17,7 @@ export enum Which { FirstOnly, All }
             * String `'foo'`
             * Regexp `/bar/`
         * Munger
+    * Last `last(rule)`
     * Proc `{ get(x) "lol" }`
         * Reference `munger(name)` defined by `define(name) ...`
     * Decorators

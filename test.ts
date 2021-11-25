@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, noop } from './munger.js';
+import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, Last } from './munger.js';
 import { parse } from './mungerparser.js';
 
 let tests = 0;
@@ -24,22 +24,22 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "the foo the bar the foobar legend";
     const replace = new Ruleset(Which.All, 
-        { find: "foo", replace: "bar" },
-        { find: /bar/g, replace: "foo" });
+        { locator: "foo", replace: "bar" },
+        { locator: /bar/g, replace: "foo" });
     const expected = "the bar the foo the barfoo legend";
     testCase(input, replace, expected);
 }
 
 {
     const input = "gooooooooooooooooal";
-    const replace = new Ruleset(Which.FirstOnly, { find: "oo", replace: "o" }).repeat();
+    const replace = new Ruleset(Which.FirstOnly, { locator: "oo", replace: "o" }).repeat();
     const expected = "goal";
     testCase(input, replace, expected);
 }
 
 {
     const input = "";
-    const replace = new Ruleset(Which.FirstOnly, { find: /^$/g, replace: "something" });
+    const replace = new Ruleset(Which.FirstOnly, { locator: /^$/g, replace: "something" });
     const expected = "something";
     testCase(input, replace, expected);
 }
@@ -47,8 +47,8 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "a";
     const replace = new Ruleset(Which.FirstOnly, 
-        { find: "a", replace: "b" },
-        { find: "a", replace: "c" });
+        { locator: "a", replace: "b" },
+        { locator: "a", replace: "c" });
     const expected = "b";
     testCase(input, replace, expected);
 }
@@ -56,16 +56,16 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const multipleTester = new Sequence(Which.All,
         new Ruleset(Which.All,
-            { find: /[0369]/g, replace: "" },
-            { find: /[47]/g, replace: "1" },
-            { find: /[258]/g, replace: "11" },
+            { locator: /[0369]/g, replace: "" },
+            { locator: /[47]/g, replace: "1" },
+            { locator: /[258]/g, replace: "11" },
         ),
         new Ruleset(Which.All,
-            { find: "111", replace: "" }
+            { locator: "111", replace: "" }
         ).repeat(),
         new Ruleset(Which.All,
-            { find: /.+/g, replace: "not" },
-            { find: /^$/g, replace: "multiple of 3" })
+            { locator: /.+/g, replace: "not" },
+            { locator: /^$/g, replace: "multiple of 3" })
     );
 
     for (let i = 0; i < 100; i++) {
@@ -77,19 +77,19 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const multipleTester = new Sequence(Which.All,
         new Ruleset(Which.FirstOnly,
-            { find: /[02468]$/g, replace: new Ruleset(Which.FirstOnly, { find: /$/g, replace: "even" }) }
+            { locator: /[02468]$/g, replace: new Ruleset(Which.FirstOnly, { locator: /$/g, replace: "even" }) }
         ),
         new Ruleset(Which.All,
-            { find: /[0369]/g, replace: "" },
-            { find: /[47]/g, replace: "1" },
-            { find: /[258]/g, replace: "11" },
+            { locator: /[0369]/g, replace: "" },
+            { locator: /[47]/g, replace: "1" },
+            { locator: /[258]/g, replace: "11" },
         ),
         new Ruleset(Which.All,
-            { find: "111", replace: "" }
+            { locator: "111", replace: "" }
         ).repeat(),
         new Ruleset(Which.FirstOnly,
-            { find: /^even$/g, replace: "multiple of 6" },
-            { find: /.*/g, replace: "not" })
+            { locator: /^even$/g, replace: "multiple of 6" },
+            { locator: /.*/g, replace: "not" })
     );
 
     for (let i = 0; i < 100; i++) {
@@ -101,8 +101,8 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = 'a,,b,"c,d",e';
     const replace = new Ruleset(Which.All,
-        { find: /".*?"/g, replace: singleRule(/^"|"$/g, "") },
-        { find: ',', replace: "\n" });
+        { locator: /".*?"/g, replace: singleRule(/^"|"$/g, "") },
+        { locator: ',', replace: "\n" });
     const expected = "a\n\nb\nc,d\ne";
     testCase(input, replace, expected);
 }
@@ -118,8 +118,8 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "2,11,5,4,3";
     const replace = new Sequence(Which.All,
         new Ruleset(Which.All,
-            { find: /\d+/g, replace: new Proc('_ "m" get max "m" set drop') },
-            { find: ',', replace: '' }),
+            { locator: /\d+/g, replace: new Proc('_ "m" get max "m" set drop') },
+            { locator: ',', replace: '' }),
         new Proc('"m" get')
     );
     const expected = "11";
@@ -164,9 +164,9 @@ function testCase(input: string, munger: Munger, expected: string) {
         h,i`.replace(/\r?\n/, '');
     const replace = singleRule(/.+/g, 
         new Ruleset(Which.All, 
-            { find: /^/g, replace: new Proc('-1 "i" set drop _') },
-            { find: /[^,]+/g, replace: new Proc('_ "i" get 1 + "i" set 1 = not when') },
-            { find: ',', replace: new Proc('_ "i" get 0 = not when')}));
+            { locator: /^/g, replace: new Proc('-1 "i" set drop _') },
+            { locator: /[^,]+/g, replace: new Proc('_ "i" get 1 + "i" set 1 = not when') },
+            { locator: ',', replace: new Proc('_ "i" get 0 = not when')}));
     const expected = `
         a,c
         d,f,g
@@ -184,9 +184,9 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "<outer><inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
-        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
-        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
-        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
+        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
+        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
+        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
     const expected = `
 <outer>
     <inner/>
@@ -201,10 +201,10 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "<outer>                             <inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
-        { find: /\s+/g, replace: '' },
-        { find: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
-        { find: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
-        { find: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
+        { locator: /\s+/g, replace: '' },
+        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
+        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
+        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
     const expected = `
 <outer>
     <inner/>
@@ -226,9 +226,9 @@ function testCase(input: string, munger: Munger, expected: string) {
 {
     const input = "0x100 is two five six while 0xffff is six five five three six, 0xDEAD";
     const replace = singleRule(/0x[0-9a-f]+/ig, new Ruleset(Which.All,
-        { find: '0x', replace: new Proc('0 set(h) clear') },
-        { find: /./g, replace: new Proc('get(h) 16 * "0123456789abcdef" _ lower index + set(h) clear') },
-        { find: /$/g, replace: new Proc('get(h)') }));
+        { locator: '0x', replace: new Proc('0 set(h) clear') },
+        { locator: /./g, replace: new Proc('get(h) 16 * "0123456789abcdef" _ lower index + set(h) clear') },
+        { locator: /$/g, replace: new Proc('get(h)') }));
     const expected = "256 is two five six while 65535 is six five five three six, 57005";
     testCase(input, replace, expected);
 }
@@ -275,5 +275,12 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "x123y";
     const replace = parse(`( /(\\d+)/ => "" )`);
     const expected = "xy";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "axbxcxd";
+    const replace = new Last({ locator: 'x', replace: "y" });
+    const expected = "axbxcyd";
     testCase(input, replace, expected);
 }
