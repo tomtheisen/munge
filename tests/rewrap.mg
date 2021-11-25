@@ -1,5 +1,10 @@
-#(
-    /[ \t]+$/m => ""            ! strip trailing spaces
-    /(.)\n(?=.)/ => { $1 " " }  ! join para lines
-    /(?=.{61})(.{1,59}\S)[ \t]+/ => { $1 "\n" } ! reflow
+#(                          ! apply rules in order
+    /[ \t]+$/m => ""        ! strip trailing spaces
+    /.\n./ => /\n/ => " "   ! join paragraph lines
+    @1(                     ! reflow - repeatedly apply to first match
+        /.{61}/             ! any run too long
+        => /\s\S+$/         ! last whitespace to the end
+        => /\s/             ! just that whitespace
+        => "\n"             ! becomes a newline
+    )
 )
