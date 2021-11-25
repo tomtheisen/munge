@@ -28,7 +28,7 @@ export function parse(source: string): Munger {
     const RegExpLiteral = /\/((?:[^\\\n])+)\/([ism]*)/y;
     function parseRegExpLiteral(): RegExp | undefined {
         let match = tryParse(RegExpLiteral);
-        if (match) return new RegExp(match[1], match[2]);
+        if (match) return new RegExp(match[1], match[2] + 'g');
     }
 
     function parseLocator(): Locator | undefined {
@@ -72,8 +72,8 @@ export function parse(source: string): Munger {
     }
 
     const ProcOpen = /{/y;
-    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?!")\S+/y;
-    const ProcClose = /{/y;
+    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?!["}])\S+/y;
+    const ProcClose = /}/y;
     function parseProc(): Proc | undefined {
         if (!tryParse(ProcOpen)) return undefined;
         let instructions: string[] = [], match: RegExpExecArray | undefined;

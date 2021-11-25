@@ -5,11 +5,12 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc; node test.js"
+    "test": "npx tsc; node test.js; node filetest.js"
   },
   "author": "Tom Theisen",
   "license": "ISC",
   "devDependencies": {
+    "@types/node": "^16.11.10",
     "typescript": "^4.5.2"
   }
 }
