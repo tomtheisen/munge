@@ -176,7 +176,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "a";
-    const replace = singleRule('a', new Proc('"\n"'));
+    const replace = singleRule('a', new Proc('"\\n"'));
     const expected = "\n";
     testCase(input, replace, expected);
 }

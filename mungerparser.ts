@@ -38,16 +38,16 @@ export function parse(source: string): Munger {
         }
     }
 
-    const DoubleStringLiteral = /"((?:[^\\"]|\\.)*)"/y;
+    const DoubleStringLiteral = /"(?:[^\\"]|\\.)*"/y;
     function parseDoubleStringLiteral(): string | undefined {
         let match = tryParse(DoubleStringLiteral);
-        if (match) return match[1].replace(/\\(.)/g, "$1");
+        if (match) return JSON.parse(match[0]);
     }
 
-    const SingleStringLiteral = /'((?:[^\\']|\\.)*)'/y;
+    const SingleStringLiteral = /'(?:[^\\']|\\.)*'/y;
     function parseSingleStringLiteral(): string | undefined {
         let match = tryParse(SingleStringLiteral);
-        if (match) return match[1].replace(/\\(.)/g, "$1");
+        if (match) return JSON.parse(match[0].replace(/^'|'$/g, '"'));
     }
 
     const RegExpLiteral = /\/((?:[^\\\n/]|\\.)+)\/([ism]*)/y;
