@@ -2,7 +2,7 @@
     /\r/ => { _ set(r) clear }
     /[ \t]+$/m => ""
     ( ! join para lines
-        /\n{2,}/ => { _ } ! noop
+        /\n{2,}/ => () ! noop
         /\n/ => " "
     )
     /$/m => " "

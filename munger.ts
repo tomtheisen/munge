@@ -41,7 +41,7 @@ export class Proc {
         let instr, match: RegExpExecArray | null;
         while (instr = instructions.shift()) {
             if (/^-?\d+$/.test(instr)) push(instr);
-            else if (instr.startsWith('"')) push(instr.substring(1, instr.length - 1));
+            else if (instr.startsWith('"')) push(JSON.parse(instr));
             else if (match = /^(set|get)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
