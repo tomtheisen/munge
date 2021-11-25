@@ -1,3 +1,5 @@
+What about last decorator for locator?
+
 ```
 type Locator = string | RegExp;
 type Rule = { find: Locator, replace: Munger };
@@ -22,7 +24,7 @@ export enum Which { FirstOnly, All }
         * Repeater `@ ...`
         * Side-effect `fx ...`
         * Consume `eat ...`
-* Named proc `define(name) ....`
+* Named proc `define(name) ....` (or is it named munger?)
 
 
 ```

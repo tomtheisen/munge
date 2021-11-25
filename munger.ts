@@ -9,6 +9,35 @@ type Context = {
     mungers: ReadonlyMap<string, Munger>;
 };
 
+type Match = {
+    index: number;
+    value: string;
+    groups: string[];
+};
+
+function nextMatch(input: string, start: number, locator: Locator): Match | undefined {
+    if (typeof locator === 'string') {
+        const index = start > input.length ? -1 : input.indexOf(locator, start);
+        if (index >= 0) return {
+            index,
+            value: locator,
+            groups: []
+        };
+    }
+    if (locator instanceof RegExp) {
+        if (!locator.global) throw "gotta be global";
+        locator.lastIndex = start;
+        const match = locator.exec(input);
+        if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
+    }
+}
+
+export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger>) {
+    const lineNormalized = input.replace(/\r\n?/g, "\n");
+    const newContext = { registers: new Map, arrays: new Map, mungers };
+    return mungeCore({ value: lineNormalized, groups: [], index: 0 }, munger, newContext);
+}
+
 export class Proc {
     private instructions: string[];
     constructor(instructions: string | string[]) {
@@ -94,34 +123,6 @@ export class Proc {
         return stack.reverse().join('');
     }
 };
-
-type Match = {
-    index: number;
-    value: string;
-    groups: string[];
-};
-
-function nextMatch(input: string, start: number, locator: Locator): Match | undefined {
-    if (typeof locator === 'string') {
-        const index = start > input.length ? -1 : input.indexOf(locator, start);
-        if (index >= 0) return {
-            index,
-            value: locator,
-            groups: []
-        };
-    }
-    if (locator instanceof RegExp) {
-        if (!locator.global) throw "gotta be global";
-        locator.lastIndex = start;
-        const match = locator.exec(input);
-        if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
-    }
-}
-
-export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger>) {
-    const newContext = { registers: new Map, arrays: new Map, mungers };
-    return mungeCore({ value: input, groups: [], index: 0 }, munger, newContext);
-}
 
 function mungeCore(input: Match, munger: Munger, ctx: Context): string {
     if (typeof munger === 'string') return munger;

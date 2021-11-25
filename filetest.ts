@@ -5,6 +5,10 @@ import { parse } from './mungerparser.js';
 
 const folder = 'tests';
 
+function normalize(s: string) {
+    return s.replace(/\r\n?/g, "\n");
+}
+
 const decoder = new TextDecoder;
 for (const file of readdirSync(folder)) {
     const fullname = join(folder, file);
@@ -26,6 +30,7 @@ for (const file of readdirSync(folder)) {
     let expected: string;
     try {
         expected = decoder.decode(readFileSync(fullname.replace(/\w+$/, "expected.txt")));
+        expected = normalize(expected);
     }
     catch (ex) {
         console.log("no output spec");
