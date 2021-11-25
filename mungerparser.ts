@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, Which } from './munger.js';
+import { Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, singleRule, Which } from './munger.js';
 
 export function parse(source: string): Munger {
     let consumed = 0;
@@ -38,9 +38,15 @@ export function parse(source: string): Munger {
         }
     }
 
-    const StringLiteral = /"((?:[^\\"]|\\.)*)"/y;
-    function parseStringLiteral(): string | undefined {
-        let match = tryParse(StringLiteral);
+    const DoubleStringLiteral = /"((?:[^\\"]|\\.)*)"/y;
+    function parseDoubleStringLiteral(): string | undefined {
+        let match = tryParse(DoubleStringLiteral);
+        if (match) return match[1].replace(/\\(.)/g, "$1");
+    }
+
+    const SingleStringLiteral = /'((?:[^\\']|\\.)*)'/y;
+    function parseSingleStringLiteral(): string | undefined {
+        let match = tryParse(SingleStringLiteral);
         if (match) return match[1].replace(/\\(.)/g, "$1");
     }
 
@@ -51,7 +57,7 @@ export function parse(source: string): Munger {
     }
 
     function parseLocator(): Locator | undefined {
-        return parseStringLiteral() ?? parseRegExpLiteral();
+        return parseSingleStringLiteral() ?? parseRegExpLiteral();
     }
 
     const GoesTo = /=>/y;
@@ -64,6 +70,12 @@ export function parse(source: string): Munger {
         return { find, replace };
     }
 
+    function parseSingleRule(): Ruleset | undefined {
+        const rule = parseRule();
+        if (rule == null) return undefined;
+        return new Ruleset(Which.All, rule);
+    }
+
     const RulesetOpen = /(1)?\(/y;
     const RulesetClose = /\)/y;
     function parseRuleset(): Ruleset | undefined {
@@ -72,7 +84,7 @@ export function parse(source: string): Munger {
 
         let rules: Rule[] = [], rule: Rule | undefined;
         while (rule = parseRule()) rules.push(rule);
-        if (!tryParse(RulesetClose)) fail(`Expected ')'`);
+        if (!tryParse(RulesetClose)) fail(`Expected rule or ')'`);
         
         return new Ruleset(open[1] ? Which.FirstOnly : Which.All, ...rules);
     }
@@ -85,7 +97,7 @@ export function parse(source: string): Munger {
 
         let mungers: Munger[] = [], munger: Munger | undefined;
         while (munger = parseMunger()) mungers.push(munger);
-        if (!tryParse(SequenceClose)) fail(`Expected ')'`);
+        if (!tryParse(SequenceClose)) fail(`Expected munger or ')'`);
         
         return new Sequence(open[1] ? Which.FirstOnly : Which.All, ...mungers);
     }
@@ -97,7 +109,7 @@ export function parse(source: string): Munger {
         if (!tryParse(ProcOpen)) return undefined;
         let instructions: string[] = [], match: RegExpExecArray | undefined;
         while (match = tryParse(ProcInstruction)) instructions.push(match[0]);
-        if (!tryParse(ProcClose)) fail(`Expected '}'`);
+        if (!tryParse(ProcClose)) fail(`Expected instruction or '}'`);
         return new Proc(instructions);
     }
 
@@ -110,11 +122,12 @@ export function parse(source: string): Munger {
     }
 
     function parseMunger(): Munger | undefined {
-        return parseStringLiteral()
-            ?? parseRuleset()
+        return parseRuleset()
             ?? parseSequence()
             ?? parseRepeater()
-            ?? parseProc();
+            ?? parseProc()
+            ?? parseSingleRule()
+            ?? parseDoubleStringLiteral();
     }
 
     const result = parseMunger();

@@ -13,7 +13,7 @@ export enum Which { FirstOnly, All }
         * Sequence All `#( )`
         * Sequence FirstOnly `1#( )`
         * Locator
-            * String `"foo"`
+            * String `'foo'`
             * Regexp `/bar/`
         * Munger
     * Proc `{ get(x) "lol" }`

@@ -1,5 +1,5 @@
 ( ! comment
     ! comment by itself
-    "foo" => "bar" ! comment
+    'foo' => "bar" ! comment
     /re/ => { "lol" "jk" cat }
 )
