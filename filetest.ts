@@ -38,6 +38,18 @@ for (const file of readdirSync(folder)) {
     }
 
     if (expected === output) console.log("Output matches");
-    else console.dir({ ast, output, expected }, { depth: null });
+    else {
+        let diffIndex = 0;
+        for (; diffIndex < expected.length || diffIndex < output.length ; diffIndex++) {
+            if (output[diffIndex] !== expected[diffIndex]) {
+                console.dir({ 
+                    ast, diffIndex, output, expected,
+                    outputFromDiff: output.substr(diffIndex, 10), 
+                    expectedFromDiff: expected.substr(diffIndex, 10) 
+                }, { depth: null });
+                break;
+            }
+        }
+    }
 }
 
