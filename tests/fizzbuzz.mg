@@ -1,5 +1,6 @@
 def(n) { i 1 + }
-def(check) { do(n) swap % 0 = when }
+def(ismul) {swap % 0 =}
+def(check) { do(n) do(ismul) when }
 #(
     all => {"X" _ rep}
     /./ => {

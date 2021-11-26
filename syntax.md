@@ -3,30 +3,31 @@
 ```
 type Locator = string | RegExp;
 type Rule = { find: Locator, replace: Munger };
-export type Munger = string | Ruleset | Proc| Repeater | Sequence;
+export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last;
 export enum Which { FirstOnly, All }
 ```
 * Comments `! comment here`
 * Mungers (basically string => string)
     * String `"foo"`
-    * Ruleset 
-        * All `( )`
-        * FirstOnly `1( )`
-        * Sequence All `#( )`
-        * Sequence FirstOnly `1#( )`
+    * Rule `locator => munger`
         * Locator
             * String `'foo'`
             * Regexp `/bar/[ism]*`
             * Wholesale `all`
         * Munger
-    * Last `last(rule)`
-    * Proc `{ get(x) "lol" }`
-        * Reference `do(name)` defined by `def(name) ...`
-        * foreach `for(arrname) { ... }`
+    * Ruleset 
+        * All `( )`
+        * FirstOnly `1( )`
+        * Sequence All `#( )`
+        * Sequence FirstOnly `1#( )`
     * Decorators
         * Repeater `@ ...`
         * Side-effect `fx ...`
         * Consume `eat ...`
+    * Last `last(rule)` (applies a rule once to the locator's last match)
+    * Proc `{ get(x) "lol" }`
+        * Reference `do(name)` defined by `def(name) ...`
+        * foreach `for(arrname) { ... }`
     * Named call `do(name)`
 * Named munger `def(name) ....`
 
