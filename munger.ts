@@ -17,19 +17,6 @@ export type Match = {
     groups: string[];
 };
 
-function nextMatch(input: string, start: number, locator: Locator): Match | undefined {
-    if (typeof locator === 'string') {
-        const index = start > input.length ? -1 : input.indexOf(locator, start);
-        if (index >= 0) return { index, value: locator, groups: [] };
-    }
-    if (locator instanceof RegExp) {
-        if (!locator.global) throw "gotta be global";
-        locator.lastIndex = start;
-        const match = locator.exec(input);
-        if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
-    }
-}
-
 export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger>) {
     const lineNormalized = input.replace(/\r\n?/g, "\n");
     const newContext = { registers: new Map, arrays: new Map, mungers };
@@ -54,11 +41,24 @@ export class Ruleset {
     apply(input: Match, ctx: Context): string {
         let startOfMatch = -1, endOfMatch = 0, ruleIndex = -1, output: string[] = [];
         for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
-            let matches = this.rules.map((r, index) => {
-                    let startIndex = endOfMatch;
-                    if (startOfMatch === startIndex && index <= ruleIndex) ++startIndex;
-                    return { index, match: nextMatch(input.value, startIndex, r.locator) };
-                }).filter(m => m.match);
+            // TODO: remember the next location for each locator, to avoid duplicate searches
+            let matches = this.rules.map((rule, ruleIndex) => {
+                let startIndex = endOfMatch;
+                if (startOfMatch === startIndex && ruleIndex <= ruleIndex) ++startIndex;
+
+                let nextMatch: Match | undefined = undefined;
+                if (typeof rule.locator === 'string') {
+                    const index = startIndex > input.value.length ? -1 : input.value.indexOf(rule.locator, startIndex);
+                    if (index >= 0) nextMatch = { index, value: rule.locator, groups: [] };
+                }
+                if (rule.locator instanceof RegExp) {
+                    if (!rule.locator.global) throw "gotta be global";
+                    rule.locator.lastIndex = startIndex;
+                    const match = rule.locator.exec(input.value);
+                    if (match) nextMatch = { index: match.index, value: match[0], groups: match.slice(1) };
+                }
+                return { index: ruleIndex, match: nextMatch };
+            }).filter(m => m.match);
             if (matches.length === 0) break;
             
             let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
