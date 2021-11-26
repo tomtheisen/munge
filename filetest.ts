@@ -45,8 +45,8 @@ for (const file of readdirSync(folder)) {
             if (output[diffIndex] !== expected[diffIndex]) {
                 console.dir({ 
                     ast, diffIndex, output, expected,
-                    outputFromDiff: output.substr(diffIndex, 10), 
-                    expectedFromDiff: expected.substr(diffIndex, 10) 
+                    outputFromDiff: output.substr(diffIndex, 40), 
+                    expectedFromDiff: expected.substr(diffIndex, 40) 
                 }, { depth: null });
                 break;
             }

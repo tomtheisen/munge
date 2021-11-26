@@ -1,0 +1,18 @@
+console.log("foo"); // line comment
+
+/* block
+console.log("bar"); // line comment
+comment */
+
+console.log("baz"); // line with /* fake block
+const real = code;
+// */
+
+const weird = " \" // "; // weird literal
+const multiline = `
+// not actually a comment
+content
+/*
+not actually a block comment
+*/
+` + /* just concat things */ "suffix";

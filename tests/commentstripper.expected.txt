@@ -1,0 +1,16 @@
+console.log("foo"); 
+
+
+
+console.log("baz"); 
+const real = code;
+
+
+const weird = " \" // "; 
+const multiline = `
+// not actually a comment
+content
+/*
+not actually a block comment
+*/
+` +  "suffix";
