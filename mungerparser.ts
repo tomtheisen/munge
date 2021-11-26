@@ -112,7 +112,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
     }
 
     const ProcOpen = /{/y;
-    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?:(?!["{}}])\S)+/y;
+    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?:(?!["{}])\S)+/y;
     const ProcClose = /}/y;
     function parseProc(): Proc | undefined {
         if (!tryParse(ProcOpen)) return undefined;

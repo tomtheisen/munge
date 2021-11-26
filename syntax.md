@@ -1,4 +1,4 @@
-allow a bare rule to be a munger?
+TODO? `if { ... } { ... }`
 
 ```
 type Locator = string | RegExp;

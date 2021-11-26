@@ -34,6 +34,7 @@ for (const file of readdirSync(folder)) {
     }
     catch (ex) {
         console.log("no output spec");
+        console.log(output);
         continue;
     }
 
