@@ -1,6 +1,5 @@
 import { Match, Context } from "./munger";
 
-
 export class Proc {
     private instructions: (string | Proc)[];
     constructor(instructions: string | (string | Proc)[]) {
@@ -32,8 +31,11 @@ export class Proc {
             return block;
         }
         function tryGetBlock() {
-            const block = instructions.shift();
-            if (block instanceof Proc) return block;
+            const block = instructions[0];
+            if (block instanceof Proc) {
+                instructions.shift();
+                return block;
+            }
         }
         function peek(depth?: number) {
             return stack[depth ?? 0] ?? "";
@@ -52,7 +54,7 @@ export class Proc {
                 push(instr);
             else if (instr.startsWith('"'))
                 push(JSON.parse(instr));
-            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -85,7 +87,6 @@ export class Proc {
                     case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                     case 'not': push(Number(pop()) ? 0 : 1); break;
-                    case 'when': truthy(pop()) || (pop(), push("")); break;
                     case 'or': {
                         const a = pop(1), b = pop();
                         push(truthy(a) ? a : b);
@@ -126,8 +127,7 @@ export class Proc {
                     case 'rev': ctx.arrays.get(pop())?.reverse(); break;
 
                     case 'if': {
-                        const condition = pop();
-                        const then = getBlock(), else_ = tryGetBlock();
+                        const condition = pop(), then = getBlock(), else_ = tryGetBlock();
                         if (truthy(condition)) then.evaluate(input, ctx, stack);
                         else if (else_) else_.evaluate(input, ctx, stack);
                         break;

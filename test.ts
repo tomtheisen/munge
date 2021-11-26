@@ -163,23 +163,6 @@ function singleRule(find: Locator, replace: Munger) {
 }
 
 {
-    const input = `
-        a,b,c
-        d,e,f,g
-        h,i`.replace(/\r?\n/, '');
-    const replace = singleRule(/.+/g, 
-        new Ruleset(Which.All, 
-            { locator: /^/g, replace: new Proc('-1 "i" set drop _') },
-            { locator: /[^,]+/g, replace: new Proc('_ "i" get 1 + "i" set 1 = not when') },
-            { locator: ',', replace: new Proc('_ "i" get 0 = not when')}));
-    const expected = `
-        a,c
-        d,f,g
-        h`.replace(/\r?\n/, '');
-    testCase(input, replace, expected);
-}
-
-{
     const input = "a";
     const replace = singleRule('a', new Proc('"\\n"'));
     const expected = "\n";
