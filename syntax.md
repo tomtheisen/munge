@@ -6,7 +6,7 @@ export type Munger = string | Ruleset | Proc| Repeater | Sequence;
 export enum Which { FirstOnly, All }
 ```
 * Comments `! comment here`
-* Mungers
+* Mungers (basically string => string)
     * String `"foo"`
     * Ruleset 
         * All `( )`
@@ -20,13 +20,13 @@ export enum Which { FirstOnly, All }
         * Munger
     * Last `last(rule)`
     * Proc `{ get(x) "lol" }`
-        * Reference `munger(name)` defined by `define(name) ...`
+        * Reference `call(name)` defined by `def(name) ...`
         * foreach `for(name) { ... }`
     * Decorators
         * Repeater `@ ...`
         * Side-effect `fx ...`
         * Consume `eat ...`
-* Named proc `define(name) ....` (or is it named munger?)
+* Named munger `def(name) ....`
 
 
 ```

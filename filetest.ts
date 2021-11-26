@@ -15,7 +15,7 @@ for (const file of readdirSync(folder)) {
     if (!fullname.endsWith(".mg")) continue;
     console.log(fullname);
 
-    const ast = parse(decoder.decode(readFileSync(fullname)));
+    const { munger: ast, named } = parse(decoder.decode(readFileSync(fullname)));
 
     let input: string;
     try {
@@ -26,7 +26,7 @@ for (const file of readdirSync(folder)) {
         continue;
     }
 
-    const output = munge(input, ast, new Map);
+    const output = munge(input, ast, named);
     let expected: string;
     try {
         expected = decoder.decode(readFileSync(fullname.replace(/\w+$/, "expected.txt")));
@@ -52,4 +52,3 @@ for (const file of readdirSync(folder)) {
         }
     }
 }
-

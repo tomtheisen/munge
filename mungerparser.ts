@@ -1,7 +1,7 @@
 import { exit } from 'process';
 import { Last, Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, SideEffects, singleRule, Which } from './munger.js';
 
-export function parse(source: string): Munger {
+export function parse(source: string): { munger: Munger, named: Map<string, Munger> } {
     let consumed = 0;
 
     const Upcoming = /.*/y;
@@ -178,7 +178,25 @@ export function parse(source: string): Munger {
             ?? parseDoubleStringLiteral();
     }
 
-    const result = parseMunger();
-    if (result == null) fail(`Expected munger definition`);
-    return result;
+    const MungerDeclaration = /def\((\w+)\)/y;
+    function parseMungerDef(): {name: string, munger: Munger} | undefined {
+        let decl = tryParse(MungerDeclaration);
+        if (decl == null) return undefined;
+        const name = decl[0];
+        let munger = parseMunger();
+        if (munger == null) fail(`Expected munger definition after named declaration`);
+        return { name, munger };
+    }
+
+    let namedMungers = new Map<string, Munger>();
+    while (true) {
+        const named = parseMungerDef();
+        if (named == null) break;
+        if (namedMungers.has(named.name)) fail(`Duplicate def() for ${ named.name }`);
+        namedMungers.set(named.name, named.munger);
+    }
+
+    const munger = parseMunger();
+    if (munger == null) fail(`Expected munger definition`);
+    return { munger, named: namedMungers };
 }

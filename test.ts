@@ -273,7 +273,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "x123y";
-    const replace = parse(`( /(\\d+)/ => "" )`);
+    const { munger: replace } = parse(`( /(\\d+)/ => "" )`);
     const expected = "xy";
     testCase(input, replace, expected);
 }
@@ -287,7 +287,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 
 {
     const input = "abc";
-    const replace = parse('#( "" )');
+    const { munger: replace } = parse('#( "" )');
     const expected = "";
     testCase(input, replace, expected);
 }

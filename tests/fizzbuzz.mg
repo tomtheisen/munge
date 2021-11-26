@@ -1,11 +1,12 @@
+def(check) { i 1 + swap % 0 = when }
 #(
     all => {"X" _ rep}
     /./ => {
-        "Fizz" i 1 + 3 % 0 = when
-        "Buzz" i 1 + 5 % 0 = when
-        cat set(fb)
+        "Fizz" 3 i 1 + swap % 0 = when
+        "Buzz" 5 i 1 + swap % 0 = when
+        cat 
         i 1 + 
-        get(fb) if
+        or
         "\n"
     }
 )

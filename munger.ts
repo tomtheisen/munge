@@ -60,6 +60,9 @@ export class Proc {
         function peek(depth?: number) {
             return stack[depth ?? 0] ?? "";
         }
+        function truthy(s: string) {
+            return !["", "0"].includes(s);
+        }
 
         const instructions = this.instructions.slice();
         let instr, match: RegExpExecArray | null;
@@ -100,8 +103,13 @@ export class Proc {
                 case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                 case 'not': push(Number(pop()) ? 0 : 1); break;
-                case 'if': push(!["", "0"].includes(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
-                case 'when': !["", "0"].includes(pop()) || (pop(), push("")); break;
+                case 'if': push(truthy(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
+                case 'when': truthy(pop()) || (pop(), push("")); break;
+                case 'or': {
+                    const a = pop(1), b = pop();
+                    push(truthy(a) ? a : b);
+                    break;
+                }
 
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
