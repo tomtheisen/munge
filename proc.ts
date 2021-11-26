@@ -54,7 +54,7 @@ export class Proc {
                 push(instr);
             else if (instr.startsWith('"'))
                 push(JSON.parse(instr));
-            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat|inc|dec)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -106,6 +106,16 @@ export class Proc {
 
                     case 'set': ctx.registers.set(pop(), peek()); break;
                     case 'get': push(ctx.registers.get(pop()) ?? ""); break;
+                    case 'inc': {
+                        const name = pop();
+                        ctx.registers.set(name, (Number(ctx.registers.get(name) ?? 0) + 1).toString());
+                        break;
+                    }
+                    case 'dec': {
+                        const name = pop();
+                        ctx.registers.set(name, (Number(ctx.registers.get(name) ?? 0) - 1).toString());
+                        break;
+                    }
 
                     case 'push': {
                         const name = pop();

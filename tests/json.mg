@@ -1,15 +1,15 @@
-def(indent) { " " get(depth) 2 * rep }
+def(nextline) { "\n" " " get(depth) 2 * rep }
 (
     /\s/ => ""
     /"(?:\\.|[^"\\])*?":/ => { _ " " }
     /"(?:\\.|[^"\\])*?"/ => ()
-    ',' => { ",\n" do(indent) }
+    ',' => { "," do(nextline) }
     /{|\[/ => { 
-        get(depth) 1 + set(depth) drop 
-        _ "\n" do(indent)
+        inc(depth)
+        _ do(nextline)
     }
     /}|\]/ => {
-        get(depth) 1 - set(depth) drop 
-        "\n" do(indent) _ 
+        dec(depth)
+        do(nextline) _ 
     }
 )
