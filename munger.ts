@@ -99,8 +99,8 @@ export class Proc {
                 case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                 case 'not': push(Number(pop()) ? 0 : 1); break;
-                case 'if': push(Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
-                case 'when': Number(pop()) || (pop(), push("")); break;
+                case 'if': push(0 !== Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
+                case 'when': 0 !== Number(pop()) || (pop(), push("")); break;
 
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;

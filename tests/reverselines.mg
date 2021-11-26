@@ -4,7 +4,7 @@
 )
 
 ! #(
-!     /.+/ => { _ "\n" get(out) len when cat get(out) cat set(out) }
+!     /.+/ => { _ "\n" get(out) when cat get(out) cat set(out) }
 !     all => { get(out) }
 !     ! /\n$/ => ""
 ! )

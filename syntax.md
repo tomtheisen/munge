@@ -21,6 +21,7 @@ export enum Which { FirstOnly, All }
     * Last `last(rule)`
     * Proc `{ get(x) "lol" }`
         * Reference `munger(name)` defined by `define(name) ...`
+        * foreach `for(name) { ... }`
     * Decorators
         * Repeater `@ ...`
         * Side-effect `fx ...`
