@@ -4,8 +4,7 @@
     /./ => {
         i set(col) drop
         for(lines) {
-            get(col) skip
-            1 take
+            _ get(col) skip 1 take
         }
         "\n"
     }

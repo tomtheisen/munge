@@ -25,6 +25,16 @@ export class Proc {
                 return stack.shift() ?? "";
             return stack.splice(depth, 1)[0] ?? "";
         }
+        function getBlock() {
+            const block = instructions.shift();
+            if (!(block instanceof Proc))
+                throw "Expected proc block, got " + block;
+            return block;
+        }
+        function tryGetBlock() {
+            const block = instructions.shift();
+            if (block instanceof Proc) return block;
+        }
         function peek(depth?: number) {
             return stack[depth ?? 0] ?? "";
         }
@@ -75,7 +85,6 @@ export class Proc {
                     case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                     case 'not': push(Number(pop()) ? 0 : 1); break;
-                    case 'if': push(truthy(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
                     case 'when': truthy(pop()) || (pop(), push("")); break;
                     case 'or': {
                         const a = pop(1), b = pop();
@@ -116,23 +125,23 @@ export class Proc {
                     case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
                     case 'rev': ctx.arrays.get(pop())?.reverse(); break;
 
+                    case 'if': {
+                        const condition = pop();
+                        const then = getBlock(), else_ = tryGetBlock();
+                        if (truthy(condition)) then.evaluate(input, ctx, stack);
+                        else if (else_) else_.evaluate(input, ctx, stack);
+                        break;
+                    }
                     case 'for': {
-                        const arr = ctx.arrays.get(pop()) ?? [];
-                        const block = instructions.shift();
-                        if (!(block instanceof Proc))
-                            throw "Expected proc block, got " + block;
+                        const arr = ctx.arrays.get(pop()) ?? [], block = getBlock();
                         let i = 0;
                         for (const e of arr) {
-                            push(e);
                             block.evaluate({ value: e, index: i++, groups: [] }, ctx, stack);
                         }
                         break;
                     }
                     case 'times': {
-                        const times = Number(pop());
-                        const block = instructions.shift();
-                        if (!(block instanceof Proc))
-                            throw "Expected proc block, got " + block;
+                        const times = Number(pop()), block = getBlock();
                         for (let i = 0; i < times; i++) {
                             block.evaluate({ value: input.value, index: i, groups: input.groups }, ctx, stack);
                         }

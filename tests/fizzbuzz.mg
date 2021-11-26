@@ -1,14 +1,11 @@
 def(n) { i 1 + }
-def(ismul) {swap % 0 =}
-def(check) { do(n) do(ismul) when }
+def(ismul) {% 0 =}
 #(
     all => {"X" _ rep}
     /./ => {
-        "Fizz" 3 do(check)
-        "Buzz" 5 do(check)
-        cat 
-        do(n)
-        or
+        do(n) 3 do(ismul) if {"Fizz"} { } ! TODO: remove this else? 
+        do(n) 5 do(ismul) if {"Buzz"}  
+        cat do(n) or
         "\n"
     }
 )

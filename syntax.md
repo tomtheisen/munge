@@ -28,6 +28,7 @@ export enum Which { FirstOnly, All }
     * Proc `{ get(x) "lol" }`
         * Reference `do(name)` defined by `def(name) ...`
         * foreach `for(arrname) { ... }`
+        * `if { ... } [{ ... }]`
     * Named call `do(name)`
 * Named munger `def(name) ....`
 
