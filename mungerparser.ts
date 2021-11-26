@@ -182,7 +182,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
     function parseMungerDef(): {name: string, munger: Munger} | undefined {
         let decl = tryParse(MungerDeclaration);
         if (decl == null) return undefined;
-        const name = decl[0];
+        const name = decl[1];
         let munger = parseMunger();
         if (munger == null) fail(`Expected munger definition after named declaration`);
         return { name, munger };

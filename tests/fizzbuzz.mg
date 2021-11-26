@@ -1,11 +1,12 @@
-def(check) { i 1 + swap % 0 = when }
+def(n) { i 1 + }
+def(check) { do(n) swap % 0 = when }
 #(
     all => {"X" _ rep}
     /./ => {
-        "Fizz" 3 i 1 + swap % 0 = when
-        "Buzz" 5 i 1 + swap % 0 = when
+        "Fizz" 3 do(check)
+        "Buzz" 5 do(check)
         cat 
-        i 1 + 
+        do(n)
         or
         "\n"
     }

@@ -1,4 +1,5 @@
 
+
 ```
 type Locator = string | RegExp;
 type Rule = { find: Locator, replace: Munger };
@@ -20,18 +21,12 @@ export enum Which { FirstOnly, All }
         * Munger
     * Last `last(rule)`
     * Proc `{ get(x) "lol" }`
-        * Reference `call(name)` defined by `def(name) ...`
-        * foreach `for(name) { ... }`
+        * Reference `do(name)` defined by `def(name) ...`
+        * foreach `for(arrname) { ... }`
     * Decorators
         * Repeater `@ ...`
         * Side-effect `fx ...`
         * Consume `eat ...`
+    * Named call `do(name)`
 * Named munger `def(name) ....`
 
-
-```
-(
-    "foo" => "bar",
-    /bar/ => { len },
-)
-```

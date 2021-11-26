@@ -71,7 +71,7 @@ export class Proc {
 
             if (/^-?\d+$/.test(instr)) push(instr);
             else if (instr.startsWith('"')) push(JSON.parse(instr));
-            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -151,6 +151,13 @@ export class Proc {
                         push(e);
                         block.evaluate({ value: e, index: i++, groups: [] }, ctx, stack);
                     }
+                    break;
+                }
+
+                case 'do': {
+                    const name = pop(), target = ctx.mungers.get(name);
+                    if (!(target instanceof Proc)) throw Error(`Can't call non-proc name '${ name }: ${ target }'`);
+                    target.evaluate(input, ctx, stack);
                     break;
                 }
                 
