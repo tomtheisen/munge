@@ -2,7 +2,7 @@ import { Proc } from "./proc.js";
 
 export type Locator = string | RegExp;
 export type Rule = { locator: Locator, replace: Munger };
-export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last | SideEffects;
+export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | SideEffects;
 export enum Which { FirstOnly, All }
 
 export type Context = {

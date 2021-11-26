@@ -1,0 +1,125 @@
+{
+  "Configuration": {
+    "name": "Configuration",
+    "kind": "ProjectConfiguration",
+    "defaultValue": "Release"
+  },
+  "DeleteAdditionalFiles": {
+    "name": "DeleteAdditionalFiles",
+    "kind": "Checkbox",
+    "defaultValue": true,
+    "label": {
+      "$ref": "strings:#/deleteAdditionalFiles"
+    }
+  },
+  "DeploymentMode": {
+    "name": "DeploymentMode",
+    "isAdditional": true,
+    "control": {
+      "kind": "Combobox",
+      "defaultValue": {
+        "$ref": "strings:#/frameworkDependent"
+      },
+      "label": {
+        "$ref": "strings:#/deploymentMode"
+      },
+      "itemsSource": [
+        {
+          "$ref": "strings:#/frameworkDependent"
+        },
+        {
+          "$ref": "strings:#/selfContained"
+        }
+      ]
+    }
+  },
+  "DeploymentSlot": {
+    "name": "DeploymentSlot",
+    "kind": "Combobox",
+    "defaultValue": "Default",
+    "label": {
+      "$ref": "strings:#/deploymentSlot"
+    },
+    "isAdditional": true,
+    "itemsSource": [
+      "Default"
+    ]
+  },
+  "InstallSiteExtensions": {
+    "name": "InstallSiteExtensions",
+    "kind": "Checkbox",
+    "defaultValue": false,
+    "label": {
+      "$ref": "strings:#/installSiteExtensions"
+    }
+  },
+  "LastUsedBuildConfiguration": {
+    "name": "LastUsedBuildConfiguration",
+    "kind": "Combobox",
+    "defaultValue": "Release",
+    "label": {
+      "$ref": "strings:#/lastUsedBuildConfiguration"
+    },
+    "itemsSource": {
+      "kind": "ConfigurationsAndPlatforms"
+    },
+    "itemsDisplayMember": "DisplayName"
+  },
+  "ProjectConfiguration": {
+    "name": "LastUsedBuildConfiguration",
+    "kind": "ProjectConfiguration",
+    "defaultValue": "Release"
+  },
+  "PlatformConfiguration": {
+    "name": "LastUsedPlatform",
+    "kind": "PlatformConfiguration",
+    "defaultValue": "Any CPU"
+  },
+  "Platform": {
+    "name": "Platform",
+    "kind": "PlatformConfiguration",
+    "defaultValue": "Any CPU"
+  },
+  "PublishDirectoryPath": {
+    "name": "PublishDirectoryPath",
+    "kind": "PublishDirectoryPath",
+    "defaultValue": ""
+  },
+  "TargetFramework": {
+    "name": "TargetFramework",
+    "kind": "Combobox",
+    "defaultValue": "netcoreapp2.1",
+    "label": {
+      "$ref": "strings:#/targetFramework"
+    },
+    "itemsSource": {
+      "kind": "TargetFrameworks"
+    }
+  },
+  "TargetRuntime": {
+    "name": "TargetRuntime",
+    "isAdditional": true,
+    "control": {
+      "kind": "Combobox",
+      "defaultValue": "win-x86",
+      "label": {
+        "$ref": "strings:#/targetRuntime"
+      },
+      "itemsSource": {
+        "kind": "TargetRuntime",
+        "defaults": [
+          "win-x86",
+          "win-x64",
+          "win-arm",
+          "osx-x64",
+          "linux-x64",
+          "linux-arm"
+        ],
+        "dependsOn": [
+          "DeploymentMode.SelectedValue"
+        ]
+      },
+      "enabled": "true"
+    }
+  }
+}

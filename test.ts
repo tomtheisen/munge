@@ -301,3 +301,16 @@ function singleRule(find: Locator, replace: Munger) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = "1/2/3 4:56:789";
+    const { munger: replace } = parse('/\\d+/ => { 0 2 _ len - 0 max rep _ }');
+    const expected = "01/02/03 04:56:789";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "1/2/3 4:56:789";
+    const { munger: replace } = parse('/\\d+/ => #({ _ 2 lpad } / / => "0")');
+    const expected = "01/02/03 04:56:789";
+    testCase(input, replace, expected);
+}
