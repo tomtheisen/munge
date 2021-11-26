@@ -1,5 +1,5 @@
 import { exit } from 'process';
-import { Last, Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, singleRule, Which } from './munger.js';
+import { Last, Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, SideEffects, singleRule, Which } from './munger.js';
 
 export function parse(source: string): Munger {
     let consumed = 0;
@@ -111,12 +111,23 @@ export function parse(source: string): Munger {
     }
 
     const ProcOpen = /{/y;
-    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?:(?!["}])\S)+/y;
+    const ProcInstruction = /"(?:[^\\"]|\\.)*"|(?:(?!["{}}])\S)+/y;
     const ProcClose = /}/y;
     function parseProc(): Proc | undefined {
         if (!tryParse(ProcOpen)) return undefined;
-        let instructions: string[] = [], match: RegExpExecArray | undefined;
-        while (match = tryParse(ProcInstruction)) instructions.push(match[0]);
+        let instructions: (string | Proc)[] = [], match: RegExpExecArray | undefined;
+        while (true) {
+            if (match = tryParse(ProcInstruction)) {
+                instructions.push(match[0]);
+                continue;
+            }
+            const innerProc = parseProc();
+            if (innerProc) {
+                instructions.push(innerProc);
+                continue;
+            }
+            break;
+        }
         if (!tryParse(ProcClose)) fail(`Expected instruction or '}'`);
         return new Proc(instructions);
     }
@@ -137,6 +148,14 @@ export function parse(source: string): Munger {
         return new Sequence(Which.All, munger, "");
     }
 
+    const EffectPrefix = /fx\b/y;
+    function parseEffect(): SideEffects | undefined {
+        if (!tryParse(EffectPrefix)) return undefined;
+        const munger = parseMunger();
+        if (munger == null) fail(`Expected munger after 'fx' decorator`);
+        return new SideEffects(munger);
+    }
+
     const LastOpen = /last\s*\(/y;
     const LastClose = /\)/y;
     function parseLast(): Last | undefined {
@@ -153,6 +172,7 @@ export function parse(source: string): Munger {
             ?? parseRepeater()
             ?? parseLast()
             ?? parseEater()
+            ?? parseEffect()
             ?? parseProc()
             ?? parseSingleRule()
             ?? parseDoubleStringLiteral();

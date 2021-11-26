@@ -1,6 +1,6 @@
 export type Locator = string | RegExp;
 export type Rule = { locator: Locator, replace: Munger };
-export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last;
+export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last | SideEffects;
 export enum Which { FirstOnly, All }
 
 type Context = {
@@ -35,8 +35,8 @@ export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string
 }
 
 export class Proc {
-    private instructions: string[];
-    constructor(instructions: string | string[]) {
+    private instructions: (string | Proc)[];
+    constructor(instructions: string | (string | Proc)[]) {
         if (typeof instructions === "string") {
             this.instructions = Array
                 .from(instructions.matchAll(/".*?"|\S+/sg))
@@ -47,8 +47,7 @@ export class Proc {
         }
     }
 
-    evaluate(input: Match, ctx: Context): string {
-        let stack: string[] = [];
+    evaluate(input: Match, ctx: Context, stack: string[] = []): string {
         function push(...es: (string | number)[]) {
             for (let e of es) {
                 stack.unshift(typeof e === 'string' ? e : e.toString());   
@@ -65,9 +64,11 @@ export class Proc {
         const instructions = this.instructions.slice();
         let instr, match: RegExpExecArray | null;
         while (instr = instructions.shift()) {
+            if (instr instanceof Proc) throw `NIE: bare proc block`
+
             if (/^-?\d+$/.test(instr)) push(instr);
             else if (instr.startsWith('"')) push(JSON.parse(instr));
-            else if (match = /^(set|get|push|pop|cons|uncons|join|rev)\((\w+)\)$/.exec(instr)) {
+            else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for)\((\w+)\)$/.exec(instr)) {
                 instructions.unshift(JSON.stringify(match[2]), match[1]);
             }
             else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -107,6 +108,8 @@ export class Proc {
                 case 'index': push(pop(1).indexOf(pop())); break;
                 case 'lower': push(pop().toLowerCase()); break;
                 case 'upper': push(pop().toUpperCase()); break;
+                case 'skip': push(pop(1).substring(Number(pop()))); break;
+                case 'take': push(pop(1).substring(0, Number(pop()))); break;
 
                 case 'set': ctx.registers.set(pop(), peek()); break;
                 case 'get': push(ctx.registers.get(pop()) ?? ""); break;
@@ -127,11 +130,23 @@ export class Proc {
                 case 'uncons': push(ctx.arrays.get(pop())?.shift() ?? ""); break;
                 case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
                 case 'rev': ctx.arrays.get(pop())?.reverse(); break;
+               
+                case 'for': {
+                    const arr = ctx.arrays.get(pop()) ?? [];
+                    const block = instructions.shift();
+                    if (!(block instanceof Proc)) throw "Expected proc block, got " + block;
+                    let i = 0;
+                    for (const e of arr) {
+                        push(e);
+                        block.evaluate({ value: e, index: i++, groups: [] }, ctx, stack);
+                    }
+                    break;
+                }
                 
                 default: throw "unrecognized instruction " + instr;
             }
         }
-        return stack.reverse().join('');
+        return stack.slice().reverse().join('');
     }
 };
 
@@ -251,5 +266,18 @@ export class Last {
         return input.substring(0, lastMatchPosition) 
             + mungeCore(lastMatch, this.rule.replace, ctx)
             + input.substring(lastMatchPosition + lastMatch.value.length);
+    }
+}
+
+export class SideEffects {
+    munger: Munger;
+
+    constructor(munger: Munger) {
+        this.munger = munger;
+    }
+
+    apply(match: Match, ctx: Context): string {
+        mungeCore(match, this.munger, ctx);
+        return match.value;
     }
 }
