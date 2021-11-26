@@ -1,5 +1,6 @@
 import { exit } from 'process';
-import { Last, Locator, Munger, Proc, Repeater, Rule, Ruleset, Sequence, SideEffects, singleRule, Which } from './munger.js';
+import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects, Which } from './munger.js';
+import { Proc } from "./proc.js";
 
 export function parse(source: string): { munger: Munger, named: Map<string, Munger> } {
     let consumed = 0;

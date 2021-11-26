@@ -1,4 +1,4 @@
-
+allow a bare rule to be a munger?
 
 ```
 type Locator = string | RegExp;

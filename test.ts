@@ -1,4 +1,5 @@
-import { munge, Ruleset, Which, Munger, Sequence, singleRule, Proc, Last } from './munger.js';
+import { munge, Ruleset, Which, Munger, Sequence, Last, Locator } from './munger.js';
+import { Proc } from "./proc.js";
 import { parse } from './mungerparser.js';
 
 let tests = 0;
@@ -12,6 +13,10 @@ function testCase(input: string, munger: Munger, expected: string) {
         console.log();
     }
     return success;
+}
+
+function singleRule(find: Locator, replace: Munger) {
+    return new Ruleset(Which.All, { locator: find, replace });
 }
 
 {
@@ -289,5 +294,19 @@ function testCase(input: string, munger: Munger, expected: string) {
     const input = "abc";
     const { munger: replace } = parse('#( "" )');
     const expected = "";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "pile of junk";
+    const { munger: replace } = parse('{ 10 times { i } }');
+    const expected = "0123456789";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "7";
+    const { munger: replace } = parse('{ 1 _ times { i 1 + * } }');
+    const expected = "5040";
     testCase(input, replace, expected);
 }
