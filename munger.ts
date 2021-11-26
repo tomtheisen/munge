@@ -83,6 +83,7 @@ export class Proc {
                 case 'drop': pop(); break;
                 case 'clear': stack.splice(0); break;
                 case 'dump': console.log({ instructions, stack, ctx }); break;
+                case 'i': push(input.index); break;
 
                 case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
 
@@ -99,8 +100,8 @@ export class Proc {
                 case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 
                 case 'not': push(Number(pop()) ? 0 : 1); break;
-                case 'if': push(0 !== Number(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
-                case 'when': 0 !== Number(pop()) || (pop(), push("")); break;
+                case 'if': push(!["", "0"].includes(pop()) ? (pop(), pop()) : (pop(1), pop())); break;
+                case 'when': !["", "0"].includes(pop()) || (pop(), push("")); break;
 
                 case 'cat': push(pop(1) + pop()); break;
                 case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
@@ -110,6 +111,8 @@ export class Proc {
                 case 'upper': push(pop().toUpperCase()); break;
                 case 'skip': push(pop(1).substring(Number(pop()))); break;
                 case 'take': push(pop(1).substring(0, Number(pop()))); break;
+                case 'ord': push(pop().codePointAt(0) ?? 0); break;
+                case 'chr': push(String.fromCodePoint(Number(pop()))); break;
 
                 case 'set': ctx.registers.set(pop(), peek()); break;
                 case 'get': push(ctx.registers.get(pop()) ?? ""); break;
