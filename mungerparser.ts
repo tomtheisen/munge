@@ -1,4 +1,3 @@
-import { exit } from 'process';
 import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects, Which } from './munger.js';
 import { Proc } from "./proc.js";
 
@@ -20,7 +19,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
         Upcoming.lastIndex = consumed;
         const upcoming = Upcoming.exec(source);
         if (upcoming) console.error(`Upcoming: ` + upcoming[0]);
-        exit(1);
+        throw Error(message);
     }
 
     const WhiteSpaceAndComments = /(?:\s|!.*)+/y;

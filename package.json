@@ -5,12 +5,18 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "npx tsc; node test.js; node filetest.js"
+    "test": "npx tsc; node test.js; node filetest.js",
+    "build": "npx tsc && npx esbuild --bundle --outfile=bundle.js ui.js && npx tsc --build --clean",
+    "build:prod": "npx tsc && npx esbuild --bundle --minify --outfile=bundle.js ui.js && npx tsc --build --clean"
   },
   "author": "Tom Theisen",
   "license": "ISC",
   "devDependencies": {
     "@types/node": "^16.11.10",
+    "esbuild": "^0.14.0",
     "typescript": "^4.5.2"
+  },
+  "dependencies": {
+    "redactio": "^1.0.0"
   }
 }
