@@ -8,7 +8,6 @@ class MungerApp extends RedactioComponent {
     constructor() {
         super(
             <div>
-                <h1>Hello mungees</h1>
                 <h2>Munging Code</h2>
                 <textarea ref="code"></textarea>
                 <div ref="codeError" class="error" hidden></div>

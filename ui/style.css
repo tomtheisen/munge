@@ -8,3 +8,18 @@ body {
 .error {
     color: #d65;
 }
+
+input, textarea {
+    background: #012;
+    color: #bcd;
+    font-size: 11pt;
+}
+
+textarea {
+    resize: vertical;
+    width: 100%;
+}
+
+h1 {
+    float: right;
+}
