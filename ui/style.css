@@ -25,8 +25,17 @@ button {
     color: #bcd;
     border-width: 0;
     padding: 0.5em;
+    cursor: pointer;
 }
 
 h1 {
+    margin: 0;
     float: right;
+}
+
+#output {
+    white-space: pre;
+    background: #234;
+    padding: 1em;
+    font-family: monospace;
 }
