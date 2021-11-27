@@ -1,13 +1,27 @@
 import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects, Which } from './munger.js';
 import { Proc } from "./proc.js";
 
+export class ParseFailure {
+    message: string;
+    position: number;
+    line: number;
+    column: number;
+
+    constructor(message: string, position: number, line: number, column: number) {
+        this.message = message;
+        this.position = position;
+        this.line = line;
+        this.column = column;
+    }
+}
+
 export function parse(source: string): { munger: Munger, named: Map<string, Munger> } {
     let consumed = 0;
 
     const Upcoming = /.*/y;
     function fail(message: string): never {
         const sofar = source.substring(0, consumed);
-        let line = 1, col = 1;
+        let line = 1, col = consumed + 1;
         for (let nl of sofar.matchAll(/\n/g)) {
             if (nl.index == null) throw Error("Internal error: RegExp match doesn't have index");
             if (nl.index > consumed) break;
@@ -19,7 +33,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
         Upcoming.lastIndex = consumed;
         const upcoming = Upcoming.exec(source);
         if (upcoming) console.error(`Upcoming: ` + upcoming[0]);
-        process.exit(1);
+        throw new ParseFailure(message, consumed, line, col);
     }
 
     const WhiteSpaceAndComments = /(?:\s|!.*)+/y;

@@ -20,6 +20,13 @@ textarea {
     width: 100%;
 }
 
+button {
+    background: #728;
+    color: #bcd;
+    border-width: 0;
+    padding: 0.5em;
+}
+
 h1 {
     float: right;
 }
