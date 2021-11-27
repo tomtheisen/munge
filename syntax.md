@@ -1,12 +1,9 @@
-TODO? `if { ... } { ... }`
-
 ```
 type Locator = string | RegExp;
 type Rule = { find: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc| Repeater | Sequence | Last;
 export enum Which { FirstOnly, All }
 ```
-* Comments `! comment here`
 * Mungers (basically string => string)
     * String `"foo"`
     * Rule `locator => munger`
@@ -30,5 +27,6 @@ export enum Which { FirstOnly, All }
         * foreach `for(arrname) { ... }`
         * `if { ... } [{ ... }]`
     * Named call `do(name)`
+* Comments `! comment here`
 * Named munger `def(name) ....`
 

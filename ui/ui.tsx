@@ -11,7 +11,8 @@ class MungerApp extends RedactioComponent {
     constructor() {
         super(
             <div>
-                <h2>Munging Code</h2>
+                <h1>Text Munge</h1>
+                <h2>Munger Source <button onclick={() => {}}>?</button></h2>
                 <textarea ref="code" oninput={() => this.codeChanged()} spellcheck={false}></textarea>
                 <div ref="codeError" class="error" hidden></div>
                 <h2>Input Document <button onclick={() => this.munge()}>▶ Munge</button></h2>

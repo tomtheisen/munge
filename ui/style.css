@@ -1,6 +1,6 @@
 body {
     background: #123;
-    color: #abc;
+    color: #cde;
     font-family: sans-serif;
     margin: 1em;
 }
@@ -11,7 +11,7 @@ body {
 
 input, textarea {
     background: #012;
-    color: #bcd;
+    color: #def;
     font-size: 11pt;
 }
 
@@ -21,16 +21,20 @@ textarea {
 }
 
 button {
-    background: #728;
+    background: #627;
     color: #bcd;
-    border-width: 0;
     padding: 0.5em;
     cursor: pointer;
+    vertical-align: middle;
 }
 
 h1 {
     margin: 0;
     float: right;
+}
+
+h2 {
+    margin: 0.5em 0 0.2em;
 }
 
 #output {
