@@ -1,0 +1,10 @@
+body {
+    background: #123;
+    color: #abc;
+    font-family: sans-serif;
+    margin: 1em;
+}
+
+.error {
+    color: #d65;
+}

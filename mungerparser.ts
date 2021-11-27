@@ -19,7 +19,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
         Upcoming.lastIndex = consumed;
         const upcoming = Upcoming.exec(source);
         if (upcoming) console.error(`Upcoming: ` + upcoming[0]);
-        throw Error(message);
+        process.exit(1);
     }
 
     const WhiteSpaceAndComments = /(?:\s|!.*)+/y;

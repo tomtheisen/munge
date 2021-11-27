@@ -6,8 +6,8 @@
   "main": "index.js",
   "scripts": {
     "test": "npx tsc; node test.js; node filetest.js",
-    "build": "npx tsc && npx esbuild --bundle --outfile=bundle.js ui.js && npx tsc --build --clean",
-    "build:prod": "npx tsc && npx esbuild --bundle --minify --outfile=bundle.js ui.js && npx tsc --build --clean"
+    "build":      "npx tsc && npx esbuild --bundle          --outfile=ui/bundle.js ui/ui.js &&                                                        npx tsc --build --clean",
+    "build:prod": "npx tsc && npx esbuild --bundle --minify --outfile=ui/bundle.js ui/ui.js && node build/embed.js ui/munger.html dist/munger.html && npx tsc --build --clean"
   },
   "author": "Tom Theisen",
   "license": "ISC",
