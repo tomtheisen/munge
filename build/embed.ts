@@ -3,7 +3,7 @@ import { dirname, join } from 'path';
 
 const decoder = new TextDecoder;
 const [sourceFileName, targetFileName] = process.argv.slice(2);
-const contents = decoder.decode(readFileSync(sourceFileName))
+let result = decoder.decode(readFileSync(sourceFileName))
 const path = dirname(sourceFileName);
 
 console.log({path});
@@ -14,17 +14,22 @@ console.log({path});
     <!--#/embed-->
 */
 
-const embedPattern = /<!--#embed\b(.*?)-->.*?<!--#\/embed-->/sg;
-const result = contents.replace(embedPattern, embed);
+result = result.replace(/<!--#embed\b(.*?)-->.*?<!--#\/embed-->/sg, doEmbed);
+result = result.replace(/{eval:(.+?)}/g, doEval);
 
 if (targetFileName) writeFileSync(targetFileName, result);
 else console.log(result);
 
-function embed(fullMatch: string, template: string): string {
+function doEmbed(fullMatch: string, template: string): string {
     const fileRefPattern = /{file:(.*?)}/g;
     return template.replace(fileRefPattern, readEmbedFile);
 }
 
 function readEmbedFile(fullMatch: string, fileName: string) {
     return decoder.decode(readFileSync(join(path, fileName)));
+}
+
+function doEval(fullMatch: string, expr: string) {
+    let result = eval(expr);
+    return `${result}`;
 }

@@ -18,6 +18,8 @@ input, textarea {
 textarea {
     resize: vertical;
     width: 100%;
+    min-height: 2em;
+    max-height: 50vh;
 }
 
 button {
@@ -26,6 +28,10 @@ button {
     padding: 0.5em;
     cursor: pointer;
     vertical-align: middle;
+}
+
+a {
+    color: #94a;
 }
 
 h1 {
