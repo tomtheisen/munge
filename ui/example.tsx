@@ -1,8 +1,8 @@
 /** @jsxImportSource redactio */
 
 import { RedactioComponent } from 'redactio/jsx-runtime.js';
-import { munge } from '../munger';
-import { parse } from '../mungerparser';
+import { munge } from '../munger.js';
+import { parse } from '../mungerparser.js';
 
 const {  munger: normalizer } = parse(`
 #( ! dedent
