@@ -2,7 +2,13 @@ html {
     background: #123;
     color: #cde;
     font-size: 13pt;
-    margin: 2em;
+    padding: 2em;
+    position: relative;
+    min-height: calc(100vh - 4em);
+}
+
+.faint {
+    color: #678;
 }
 
 .error {
@@ -16,7 +22,7 @@ input, textarea {
 }
 
 textarea {
-    resize: vertical;
+    resize: none;
     width: 100%;
     min-height: 2em;
     max-height: 50vh;
@@ -92,3 +98,8 @@ dfn {
     background: #323;
 }
 
+footer {
+    position: absolute;
+    height: 2em;
+    bottom: 0;
+}

@@ -8,6 +8,8 @@ export class AutoSizingTextArea extends RedactioComponent {
             spellcheck={false}
             onkeydown={ev => this.keydown(ev)} 
             oninput={() => this.autosize()} />);
+
+        window.addEventListener("resize", () => this.autosize());
     }
 
     private get textarea() { return this.element as HTMLTextAreaElement; }

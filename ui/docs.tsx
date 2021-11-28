@@ -171,7 +171,7 @@ export class MungerDocs extends RedactioComponent {
                                 /[A-Z]/ => { _ lower }
                             )`} />
                     <p>
-                        There's a <a target="_blank" href="?proc">whole separate page</a> about the details of the proc language.
+                        There's a <a href="?proc">whole separate page</a> about the details of the proc language.
                     </p>
                 </section>
                 <h2 id="effects">Side effects</h2>
