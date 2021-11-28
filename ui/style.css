@@ -2,9 +2,9 @@ html {
     background: #123;
     color: #cde;
     font-size: 13pt;
-    padding: 2em;
+    padding: 1em 2em 2em;
     position: relative;
-    min-height: calc(100vh - 4em);
+    min-height: calc(100vh - 3em);
 }
 
 .faint {
@@ -42,7 +42,18 @@ a {
 
 #app-title {
     margin: 0;
-    float: right;
+}
+
+#app-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -1em;
+}
+
+#app-inputs > * {
+    flex-grow: 1;
+    min-width: 36em;
+    margin: 1em;
 }
 
 h2 {
@@ -102,4 +113,8 @@ footer {
     position: absolute;
     height: 2em;
     bottom: 0;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    width: calc(100vw - 4em);
 }

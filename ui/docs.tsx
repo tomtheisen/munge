@@ -62,7 +62,7 @@ export class MungerDocs extends RedactioComponent {
                     <p>
                         There are also regular expression locators, using mostly javascript syntax.
                         The <code>ism</code> flags are supported. 
-                        The <code>g</code> flag is implied.
+                        The <code>g</code> flag is implied.&nbsp;
                         <code>all</code> is shorthand for <code>/.*/s</code>.
                     </p>
                     <MungeExample input="abc 123 def 456" munger={`/\\d/ => "_"`} />
@@ -187,8 +187,8 @@ export class MungerDocs extends RedactioComponent {
                             middle
                             last`}
                         munger={`
-                            #( !last shall be first
-                                fx /.+/ => { _ len set(lastlen) }
+                            #(
+                                fx /.+/ => { _ len set(lastlen) } ! matches every line
                                 1( /$/m => { " Length of last line: " get(lastlen) } )
                             )`} />
                 </section>

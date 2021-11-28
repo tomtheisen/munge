@@ -14,18 +14,24 @@ export class MungerApp extends RedactioComponent {
         super(
             <div>
                 <h1 ref="mungeTitle" id="app-title">Text Munge</h1>
-                <h2>Munger Source
-                    &nbsp;<small class="faint">(<kbd>F2</kbd>)</small> 
-                    &nbsp;<small><a href="?docs" target="_blank">?</a></small>
-                </h2>
-                <AutoSizingTextArea ref="code" />
-                <div ref="codeError" class="error" hidden></div>
-                <h2>
-                    Input Document
-                    &nbsp;<small class="faint">(<kbd>F4</kbd>)</small> 
-                    &nbsp;<button title="Ctrl + Enter" onclick={() => this.munge()}>▶ Munge <small>(F8)</small></button>
-                </h2>
-                <AutoSizingTextArea ref="input" />
+                <div id="app-inputs">
+                    <div>
+                        <h2>Munger Source
+                            &nbsp;<small class="faint">(<kbd>F2</kbd>)</small> 
+                            &nbsp;<small><a href="?docs" target="_blank">?</a></small>
+                        </h2>
+                        <AutoSizingTextArea ref="code" />
+                        <div ref="codeError" class="error" hidden></div>
+                    </div>
+                    <div>
+                        <h2>
+                            Input Document
+                            &nbsp;<small class="faint">(<kbd>F4</kbd>)</small> 
+                            &nbsp;<button title="Ctrl + Enter" onclick={() => this.munge()}>▶ Munge <small>(F8)</small></button>
+                        </h2>
+                        <AutoSizingTextArea ref="input" />
+                    </div>
+                </div>
 
                 <div ref="outputPanel" hidden>
                     <h2>Output <button onclick={() => this.copyOutput()}>⧉ Copy</button></h2>
