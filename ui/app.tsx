@@ -4,6 +4,7 @@ import { RedactioComponent } from 'redactio/jsx-runtime.js';
 import { parse, ParseFailure } from '../mungerparser.js';
 import { munge } from '../munger.js';
 import { AutoSizingTextArea } from './inputs.js';
+import { decodePermalink, makePermalink } from './permalinks.js';
 
 const MungerSourceKey = "MungerSource";
 const MungerDocKey = "MungerDoc";
@@ -104,18 +105,14 @@ export class MungerApp extends RedactioComponent {
     }
 
     savePermaLink() {
-        const state = btoa(JSON.stringify({
-            m: this.code.value,
-            i: this.input.value,
-        }));
-        location.hash = '#' + state;
+        location.hash = makePermalink(this.code.value, this.input.value);
     }
 
     loadPermaLink() {
         try {
-            const state = JSON.parse(atob(location.hash.substring(1)));
-            this.code.value = state.m;
-            this.input.value = state.i;
+            const state = decodePermalink(location.hash);
+            this.code.value = state.munger;
+            this.input.value = state.input;
         }
         catch (ex) {
             console.error(ex);
