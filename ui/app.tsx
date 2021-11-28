@@ -28,10 +28,15 @@ export class MungerApp extends RedactioComponent {
             </div>);
 
         this.loadState();
+        this.loadPermaLink();
 
         document.addEventListener("keydown", ev => {
             if (ev.key === "Enter" && ev.ctrlKey) this.munge();
-        })
+            if (ev.key === "s" && ev.ctrlKey) {
+                this.savePermaLink();
+                ev.preventDefault();
+            }
+        });
     }
 
     get code() { return this.refs.code as AutoSizingTextArea; }
@@ -95,6 +100,25 @@ export class MungerApp extends RedactioComponent {
             }
             this.refs.codeError.hidden = false;
             return;
+        }
+    }
+
+    savePermaLink() {
+        const state = btoa(JSON.stringify({
+            m: this.code.value,
+            i: this.input.value,
+        }));
+        location.hash = '#' + state;
+    }
+
+    loadPermaLink() {
+        try {
+            const state = JSON.parse(atob(location.hash.substring(1)));
+            this.code.value = state.m;
+            this.input.value = state.i;
+        }
+        catch (ex) {
+            console.error(ex);
         }
     }
 }

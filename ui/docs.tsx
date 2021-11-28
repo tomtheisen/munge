@@ -207,6 +207,9 @@ export class MungerDocs extends RedactioComponent {
                                 /[a-z]+/i => { do(paren) }
                             )`} />
                 </section>
+                <p>
+                    Did you know?  You can press <kbd>Ctrl</kbd> + <kbd>S</kbd> to generate a permalink.
+                </p>
             </article>
         );
     }
