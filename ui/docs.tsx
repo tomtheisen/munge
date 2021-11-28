@@ -42,7 +42,6 @@ export class MungerDocs extends RedactioComponent {
                         <li>Side-effect decorator</li>
                         <li>Last decorator</li>
                         <li>Proc</li>
-                        <li>Named munger reference</li>
                     </ul>
                 </section>
                 <h2 id="rule">Rules</h2>
@@ -56,8 +55,8 @@ export class MungerDocs extends RedactioComponent {
                 <section>
                     <p>
                         A <dfn>locator</dfn> finds some particular substring of the input to manipulate.
-                        There are two kinds.  For now.  I got some ideas about combinators.
-                        But anyway.  The simplest locator is the literal.  
+                        There are two kinds.  For now.  
+                        The simplest locator is the literal.  
                         It's enclosed in single quotes.
                     </p>
                     <MungeExample input={"Once you munge,\nyou never go back"} munger={`' ' => ""`} />
@@ -65,13 +64,14 @@ export class MungerDocs extends RedactioComponent {
                         There are also regular expression locators, using mostly javascript syntax.
                         The <code>ism</code> flags are supported. 
                         The <code>g</code> flag is implied.
+                        <code>all</code> is shorthand for <code>/.*/s</code>.
                     </p>
                     <MungeExample input="abc 123 def 456" munger={`/\\d/ => "_"`} />
                 </section>
                 <h2 id="munger-literal">Literal</h2>
                 <section>
                     <p>
-                        This is the simplest type of munger.  
+                        A <dfn>literal munger</dfn> is the simplest type of munger.  
                         It's a string literal in double quotes.
                         Single quotes are for locators.
                         Double quotes are for mungers.
@@ -109,38 +109,105 @@ export class MungerDocs extends RedactioComponent {
                         After that rule is applied, no further munging is performed.
                         First-only rulesets are expressed by adding a preceding 1: <code>1( [rules here] )</code>
                     </p>
-                    <MungeExample
-                        input={`
-                            1. abc
-                            2. ab
-                            3. bc`}
-                        munger={`
-                            1(
-                                'ab' => "X"
-                                'bc' => "Y"
-                            )`}/>
+                    <MungeExample input="foo foo foo" munger={`1( 'foo' => "bar" )`}/>
                 </section>
-                <h2 id="sequence">Sequenced rulesets</h2>
+                <h2 id="sequence">Sequences</h2>
                 <section>
                     <p>
-                        Another way of modifying the behavior of a ruleset is to make a <dfn>sequenced ruleset</dfn>.
-                        Rather than scanning the document from start to end, a sequenced ruleset iterates over rules in declaration order.
-                        It applies each rule to the entire document in declaration order.
-                        This means that subsequent rules are able to see the output from the previous rules.
+                        A <dfn>sequence</dfn> is an orderd list of mungers.
+                        Rather than scanning the document from start to end, a sequence iterates over rules in declaration order.
+                        It applies each munger to the entire document in declaration order.
+                        This means that subsequent mungers are able to see the output from the previous rules.
                         These use a <code>#</code> prefix.
                     </p>
-                </section>
-                <h3 id="last">Last</h3>
-                <section>
+                    <MungeExample input="food" munger={`
+                        #( 
+                            'foo' => "bar"
+                            'ard' => "icycle"
+                        )`} />
                     <p>
-                        A <dfn>locator</dfn>
+                        It's also possible to combine a sequenced and first-only ruleset this way.
+                        These apply only the first rule to match, in declaration order, instead of document order.  The prefix is <code>1#</code>.
                     </p>
                 </section>
                 <h2 id="repeater">Repeaters</h2>
+                <section>
+                    <p>
+                        A <dfn>repeater</dfn> is a decorated munger.
+                        You can preced any other munger with a <code>@</code>, and it will become a repeater.
+                        The at symbol looks like a wheel to me, just rolling and rolling.
+                        A repeater applies repeatedly to its input until a fixed point is reached.
+                        It's not too hard to make an infinite loop with these.
+                    </p>
+                    <MungeExample input="a{{}{{}}}b" munger={`@'{}' => ""`} />
+                </section>
+                <h2 id="last">Last match</h2>
+                <section>
+                    <p>
+                        You can apply a rule only to the last match of its locator using a <dfn>last</dfn>.
+                        This can only be applied to a single rule.
+                    </p>
+                    <MungeExample input="foo foo foo" munger={`last('foo' => "bar")`}/>
+                </section>
                 <h2 id="comment">Comments</h2>
+                <section>
+                    <p>
+                        You can add a <dfn>comment</dfn> to the end of any line in a munger.
+                        Comments start with a <code>!</code>.
+                    </p>
+                    <MungeExample input="loool             " munger={`/\\s+$/ => "" ! trailing whitespace`} />
+                </section>
                 <h2 id="proc">Procs</h2>
+                <section>
+                    <p>
+                        Now it's time for the big guns.
+                        A <dfn>proc</dfn> is an arbitrary piece of logic inside of <code>{`{ }`}</code> curly braces.
+                        It's a concatenative stack-based language fully enclosed inside the text munging language.
+                        Ok, let's just look at some code.
+                    </p>
+                    <MungeExample input="Hello World"
+                        munger={`
+                            ( ! toggle case
+                                /[a-z]/ => { _ upper }
+                                /[A-Z]/ => { _ lower }
+                            )`} />
+                    <p>
+                        There's a <a target="_blank" href="?proc">whole separate page</a> about the details of the proc language.
+                    </p>
+                </section>
                 <h2 id="effects">Side effects</h2>
+                <section>
+                    <p>
+                        There's a <dfn>side effect</dfn> decoration you can use on any munger if you only want to use it for side effects.
+                        This is generally most useful if you have procs that are setting variables or something that you're going to use later.
+                        Preced any munger with `fx`, and it won't actually do any replacement.
+                    </p>
+                    <MungeExample 
+                        input={`
+                            first
+                            middle
+                            last`}
+                        munger={`
+                            #( !last shall be first
+                                fx /.+/ => { _ len set(lastlen) }
+                                1( /$/m => { " Length of last line: " get(lastlen) } )
+                            )`} />
+                </section>
                 <h2 id="named">Named munger declarations</h2>
+                <section>
+                    <p>
+                        Prior to the munger, you can create one or more <dfn>named munger declarations</dfn>.
+                        These can be referred to later.
+                        These are <code>def(name)</code> followed by a munger.
+                    </p>
+                    <MungeExample input = "abc123def567"
+                        munger = {`
+                            def(paren) { "(" _ ")" }
+                            ( ! enclose runs in parens
+                                /\\d+/     => { do(paren) }
+                                /[a-z]+/i => { do(paren) }
+                            )`} />
+                </section>
             </article>
         );
     }

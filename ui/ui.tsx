@@ -9,6 +9,9 @@ switch (location.search) {
         const docs = new MungerDocs;
         main.append(docs.element);
         break;
+    case "?proc":
+        main.append("proc stuff");
+        break;
     case "?about":
         main.append("Text Munger by Tom Theisen");
         break;
