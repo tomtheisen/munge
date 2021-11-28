@@ -74,8 +74,16 @@ export class Proc {
 
                     case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
 
-                    case 'max': stack.length >= 2 && push(Math.max(Number(pop()), Number(pop()))); break;
-                    case 'min': stack.length >= 2 && push(Math.min(Number(pop()), Number(pop()))); break;
+                    case 'max': 
+                        if (stack.length >= 2) {
+                            push(Math.max(...[pop(), pop()].filter(x => x).map(Number)));    
+                        } 
+                        break;
+                    case 'min': 
+                        if (stack.length >= 2) {
+                            push(Math.min(...[pop(), pop()].filter(x => x).map(Number)));    
+                        }
+                        break;
                     case '>': push(pop(1) > pop() ? 1 : 0); break;
                     case '<': push(pop(1) < pop() ? 1 : 0); break;
                     case '=': push(pop() == pop() ? 1 : 0); break;

@@ -1,8 +1,8 @@
-body {
+html {
     background: #123;
     color: #cde;
-    font-family: sans-serif;
-    margin: 1em;
+    font-size: 13pt;
+    margin: 2em;
 }
 
 .error {
@@ -12,7 +12,7 @@ body {
 input, textarea {
     background: #012;
     color: #def;
-    font-size: 11pt;
+    font-size: 100%;
 }
 
 textarea {
@@ -31,10 +31,10 @@ button {
 }
 
 a {
-    color: #94a;
+    color: #b7c;
 }
 
-h1 {
+#app-title {
     margin: 0;
     float: right;
 }
@@ -48,4 +48,35 @@ h2 {
     background: #234;
     padding: 1em;
     font-family: monospace;
+}
+
+article {
+    max-width: 40em;
+    margin: 0 auto;
+}
+
+.example {
+    display: flex;
+    justify-content: space-around;
+}
+
+.example > * {
+    flex: auto;
+    margin: 0.3em;
+    overflow: auto;
+}
+
+.example h5 {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.example pre {
+    background: #0008;
+    padding: 0.7em;
+    font-size: 90%;
+}
+
+code {
+    background: #0008;
 }

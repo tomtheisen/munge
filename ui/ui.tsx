@@ -1,13 +1,20 @@
 /** @jsxImportSource redactio */
 
-import { MungerApp } from './MungerApp.js';
+import { MungerApp } from './app.js';
+import { MungerDocs } from './docs.js';
 
-switch (window.location.hash) {
-    case "#docs":
+const main = document.querySelector("main")!;
+switch (location.search) {
+    case "?docs":
+        const docs = new MungerDocs;
+        main.append(docs.element);
+        break;
+    case "?about":
+        main.append("Text Munger by Tom Theisen");
         break;
     default:
         const app = new MungerApp;
         app.refs.mungeTitle.title = (document.getElementById("build-date") as HTMLInputElement).value;
-        document.getElementById("app")!.append(app.element);
+        main.append(app.element);
         app.mounted();
 }

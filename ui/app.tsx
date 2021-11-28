@@ -12,9 +12,9 @@ export class MungerApp extends RedactioComponent {
     constructor() {
         super(
             <div>
-                <h1 ref="mungeTitle">Text Munge</h1>
+                <h1 ref="mungeTitle" id="app-title">Text Munge</h1>
                 <h2>Munger Source&nbsp;
-                    <small><a href="#docs" target="_blank">?</a></small>
+                    <small><a href="?docs" target="_blank">?</a></small>
                 </h2>
                 <AutoSizingTextArea ref="code" />
                 <div ref="codeError" class="error" hidden></div>

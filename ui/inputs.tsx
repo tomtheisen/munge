@@ -4,7 +4,10 @@ import { RedactioComponent } from 'redactio/jsx-runtime.js';
 
 export class AutoSizingTextArea extends RedactioComponent {
     constructor() {
-        super(<textarea spellcheck={false} oninput={() => this.autosize()} />);
+        super(<textarea 
+            spellcheck={false}
+            onkeydown={ev => this.keydown(ev)} 
+            oninput={() => this.autosize()} />);
     }
 
     private get textarea() { return this.element as HTMLTextAreaElement; }
@@ -20,6 +23,15 @@ export class AutoSizingTextArea extends RedactioComponent {
 
     get selectionEnd() { return this.textarea.selectionEnd; }
     set selectionEnd(value: number) { this.textarea.selectionEnd = value; }
+
+    keydown(ev: KeyboardEvent) {
+        if(ev.key === "Tab") {
+            ev.preventDefault();
+            const pos = this.selectionStart;
+            this.value = this.value.substring(0, pos) + "\t" + this.value.substring(pos);
+            this.selectionEnd = this.selectionStart = pos + 1;
+        }
+    }
 
     autosize() {
         if (this.element.isConnected) {

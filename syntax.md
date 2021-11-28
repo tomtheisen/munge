@@ -20,7 +20,6 @@ export enum Which { FirstOnly, All }
     * Decorators
         * Repeater `@ ...`
         * Side-effect `fx ...`
-        * Consume `eat ...`
     * Last `last(rule)` (applies a rule once to the locator's last match)
     * Proc `{ get(x) "lol" }`
         * Reference `do(name)` defined by `def(name) ...`

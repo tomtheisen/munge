@@ -17,7 +17,8 @@ export type Match = {
     groups: string[];
 };
 
-export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger>) {
+const emptyMap = new Map;
+export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger> = emptyMap) {
     const lineNormalized = input.replace(/\r\n?/g, "\n");
     const newContext = { registers: new Map, arrays: new Map, mungers };
     return mungeCore({ value: lineNormalized, groups: [], index: 0 }, munger, newContext);
