@@ -5,7 +5,7 @@ def(nl) {                 ! macro definition for next line
 (
     /\s/ => ""            ! strip pre-existing whitespace
     /"(?:\\.|.)*?"/ => () ! don't touch string literals
-    ':' => ": "           ! single space after comma
+    ':' => ": "           ! single space after colon
     ',' => { _ do(nl) }   ! newline after comma
     /{|\[/ => {           ! open braces
         inc(depth)

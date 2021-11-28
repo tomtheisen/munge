@@ -119,6 +119,40 @@ export class ProcDocs extends RedactioComponent {
                     <dt><code>dump</code></dt>
                         <dd>Logs the current state of things to the console.</dd>
                 </dl>
+                <h2>Parting Example</h2>
+                <p>
+                    Here's a fancy little number that demonstrates many of these.
+                    It indents JSON.
+                </p>
+                <MungeExample
+                    input={`
+                        { "kind": "Combobox", "defaultValue": "win-x86", 
+                        "label": { "$ref": "strings:#/targetRuntime" }, 
+                        "itemsSource": { "kind": "TargetRuntime", "defaults": 
+                        [ "win-x86", "win-x64", "win-arm", "osx-x64", 
+                        "linux-x64", "linux-arm" ], "dependsOn": [ 
+                        "DeploymentMode.SelectedValue" ] }, "enabled": 
+                        "true" }`}
+                    munger={`
+                        def(nl) {                 ! macro definition for next line
+                            "\\n"
+                            "  " get(depth) rep   ! repeat indent string
+                        }
+                        (
+                            /\\s/ => ""            ! strip pre-existing whitespace
+                            /"(?:\\\\.|.)*?"/ => () ! don't touch string literals
+                            ':' => ": "           ! single space after colon
+                            ',' => { _ do(nl) }   ! newline after comma
+                            /{|\\[/ => {           ! open braces
+                                inc(depth)
+                                _ do(nl)
+                            }
+                            /}|\\]/ => {           ! close braces
+                                dec(depth)
+                                do(nl) _ 
+                            }
+                        )`}
+                />
             </article>
         )
     }
