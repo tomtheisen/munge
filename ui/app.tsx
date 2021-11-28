@@ -133,6 +133,7 @@ export class MungerApp extends RedactioComponent {
 
     loadPermaLink() {
         try {
+            if (location.hash.length < 2) return;
             const state = decodePermalink(location.hash);
             this.code.value = state.munger;
             this.input.value = state.input;
