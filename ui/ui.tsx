@@ -2,6 +2,7 @@
 
 import { MungerApp } from './app.js';
 import { MungerDocs } from './docs.js';
+import { ProcDocs } from './procdocs.js';
 
 const main = document.querySelector("main")!;
 switch (location.search) {
@@ -10,7 +11,8 @@ switch (location.search) {
         main.append(docs.element);
         break;
     case "?proc":
-        main.append("proc stuff");
+        const procDocs = new ProcDocs;
+        main.append(procDocs.element);
         break;
     case "?about":
         main.append("Text Munger by Tom Theisen");

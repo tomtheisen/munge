@@ -57,24 +57,27 @@ article {
 
 .example {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-around;
 }
 
 .example > * {
     flex: auto;
     margin: 0.3em;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .example h5 {
-    margin-top: 0;
-    margin-bottom: 1em;
+    margin: 0;
 }
 
 .example pre {
     background: #0008;
     padding: 0.7em;
     font-size: 90%;
+    flex-grow: 1;
+    margin-top: 0.5em
 }
 
 code {

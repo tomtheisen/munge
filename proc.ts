@@ -63,7 +63,6 @@ export class Proc {
             else
                 switch (instr) {
                     case '_': push(input.value); break;
-                    case 'nl': push("\n"); break;
                     case 'len': push(pop().length); break;
                     case 'swap': push(pop(), pop()); break;
                     case 'copy': push(peek()); break;

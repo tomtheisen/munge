@@ -172,9 +172,9 @@ function singleRule(find: Locator, replace: Munger) {
 {
     const input = "<outer><inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
-        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
-        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
-        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
+        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
+        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
+        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\\n"') });
     const expected = `
 <outer>
     <inner/>
@@ -190,9 +190,9 @@ function singleRule(find: Locator, replace: Munger) {
     const input = "<outer>                             <inner/><inner><child/></inner></outer>";
     const replace = new Ruleset(Which.All,
         { locator: /\s+/g, replace: '' },
-        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ nl') },
-        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ nl') },
-        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ nl') });
+        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
+        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
+        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\\n"') });
     const expected = `
 <outer>
     <inner/>

@@ -34,14 +34,13 @@ export class MungerDocs extends RedactioComponent {
                         There are several types of mungers.
                     </p>
                     <ul>
-                        <li>Rule</li>
-                        <li>Ruleset</li>
-                        <li>String</li>
-                        <li>Repeater</li>
-                        <li>Repeater decorator</li>
-                        <li>Side-effect decorator</li>
-                        <li>Last decorator</li>
-                        <li>Proc</li>
+                        <li><a href="#rule">Rule</a></li>
+                        <li><a href="#ruleset">Ruleset</a></li>
+                        <li><a href="#literal">String</a></li>
+                        <li><a href="#repeater">Repeater</a></li>
+                        <li><a href="#effects">Side-effect decorator</a></li>
+                        <li><a href="#last">Last decorator</a></li>
+                        <li><a href="#proc">Proc</a></li>
                     </ul>
                 </section>
                 <h2 id="rule">Rules</h2>
@@ -68,7 +67,7 @@ export class MungerDocs extends RedactioComponent {
                     </p>
                     <MungeExample input="abc 123 def 456" munger={`/\\d/ => "_"`} />
                 </section>
-                <h2 id="munger-literal">Literal</h2>
+                <h2 id="literal">Literal</h2>
                 <section>
                     <p>
                         A <dfn>literal munger</dfn> is the simplest type of munger.  
