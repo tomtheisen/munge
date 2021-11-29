@@ -8,12 +8,6 @@ const path = dirname(sourceFileName);
 
 console.log({path});
 
-/*
-    <!--#embed <style>{file:style.css}</style>-->
-    <link rel="stylesheet" href="style.css">
-    <!--#/embed-->
-*/
-
 result = result.replace(/<!--#embed\b(.*?)-->.*?<!--#\/embed-->/sg, doEmbed);
 result = result.replace(/{eval:(.+?)}/g, doEval);
 
