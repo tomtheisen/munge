@@ -52,7 +52,7 @@ a {
 
 #app-inputs > * {
     flex-grow: 1;
-    min-width: 36em;
+    min-width: calc(min(36em, 100vw - 5em));
     margin: 1em;
 }
 
