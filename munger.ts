@@ -30,6 +30,19 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
 	else return munger.apply(input, ctx);
 }
 
+function nextMatch(input: string, locator: Locator, startFrom: number): Match | undefined {
+	if (typeof locator === 'string') {
+		const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
+		if (index >= 0) return { index, value: locator, groups: [] };
+	}
+	if (locator instanceof RegExp) {
+		if (!locator.global) throw "gotta be global";
+		locator.lastIndex = startFrom;
+		const match = locator.exec(input);
+		if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
+	}
+}
+
 export class Ruleset {
 	rules: Rule[];
 	which: Which;
@@ -40,39 +53,36 @@ export class Ruleset {
 	}
 
 	apply(input: Match, ctx: Context): string {
-		let startOfMatch = -1, endOfMatch = 0, ruleIndex = -1, output: string[] = [];
-		for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
-			// TODO: remember the next location for each locator, to avoid duplicate searches
-			let matches = this.rules.map((rule, ruleIndex) => {
-				let startIndex = endOfMatch;
-				if (startOfMatch === startIndex && ruleIndex <= ruleIndex) ++startIndex;
+		let startOfMatch = -1, endOfMatch = 0, output: string[] = [], lastRuleIndex = -1;
+		let ruleIndex: number, bestMatch: Match | undefined;
+		let ruleMatches: (Match | undefined)[] = this.rules.map(() => ({ value: "", index: -1, groups: [] }));
 
-				let nextMatch: Match | undefined = undefined;
-				if (typeof rule.locator === 'string') {
-					const index = startIndex > input.value.length ? -1 : input.value.indexOf(rule.locator, startIndex);
-					if (index >= 0) nextMatch = { index, value: rule.locator, groups: [] };
+		for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
+			bestMatch = undefined; 
+			ruleIndex = -1;
+			for (let i = 0; i < this.rules.length; i++) {
+				let ruleMatch = ruleMatches[i];
+				if (ruleMatch == null) continue;
+				const searchStart = i <= lastRuleIndex 
+					? Math.max(startOfMatch + 1, endOfMatch) 
+					: endOfMatch;
+				ruleMatches[i] = ruleMatch = nextMatch(input.value, this.rules[i].locator, searchStart);
+				if (ruleMatch == null) continue;
+				if (bestMatch == null || ruleMatch.index < bestMatch.index) {
+					bestMatch = ruleMatch;
+					ruleIndex = i;
 				}
-				if (rule.locator instanceof RegExp) {
-					if (!rule.locator.global) throw "gotta be global";
-					rule.locator.lastIndex = startIndex;
-					const match = rule.locator.exec(input.value);
-					if (match) nextMatch = { index: match.index, value: match[0], groups: match.slice(1) };
-				}
-				return { index: ruleIndex, match: nextMatch };
-			}).filter(m => m.match);
-			if (matches.length === 0) break;
-			
-			let { index, match } = matches.reduce((a, b) => a.match!.index <= b.match!.index ? a : b);
-			if (!match) break;
-			
-			ruleIndex = index;
-			let { replace } = this.rules[ruleIndex];
+			}
+
+			if (bestMatch == null) break;
 
 			output.push(
-				input.value.substring(endOfMatch, match.index),
-				mungeCore(match, replace, ctx));
-			startOfMatch = match.index;
-			endOfMatch = match.index + match.value.length;
+				input.value.substring(endOfMatch, bestMatch.index),
+				mungeCore(bestMatch, this.rules[ruleIndex].replace, ctx));
+
+			lastRuleIndex = ruleIndex;
+			startOfMatch = bestMatch.index;
+			endOfMatch = bestMatch.index + bestMatch.value.length;
 
 			if (this.which === Which.FirstOnly) break;
 		}

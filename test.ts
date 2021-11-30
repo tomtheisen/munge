@@ -314,3 +314,10 @@ function singleRule(find: Locator, replace: Munger) {
     const expected = "01/02/03 04:56:789";
     testCase(input, replace, expected);
 }
+
+{
+    const input = "ab";
+    const { munger: replace } = parse(`('' => "1" '' => "2")`);
+    const expected = "12a12b12";
+    testCase(input, replace, expected);
+}

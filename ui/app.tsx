@@ -104,7 +104,7 @@ export class MungerApp extends RedactioComponent {
 			const output = munge(this.input.value, parsed.munger, parsed.named);
 			this.refs.output.innerText = output;
 			this.refs.outputPanel.hidden = false;
-			console.log(`elapsed: ${ new Date().valueOf() - start.valueOf() } ms`);
+			console.info(`elapsed: ${ new Date().valueOf() - start.valueOf() } ms`);
 		}
 		catch (er: any) {
 			if (er instanceof ParseFailure) {
