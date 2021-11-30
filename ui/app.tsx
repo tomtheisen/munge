@@ -19,6 +19,7 @@ export class MungerApp extends RedactioComponent {
 						<h2>Munger Source
 							&nbsp;<small class="faint">(<kbd>F2</kbd>)</small> 
 							&nbsp;<small><a href="?docs" target="_blank">?</a></small>
+							&nbsp;<small><a href="?#" target="_blank">New</a></small>
 						</h2>
 						<AutoSizingTextArea ref="code" />
 						<div ref="codeError" class="error" hidden></div>
@@ -44,22 +45,13 @@ export class MungerApp extends RedactioComponent {
 
 		document.addEventListener("keydown", ev => {
 			if (ev.key === "Enter" && ev.ctrlKey) this.munge();
-			else if (ev.key === "s" && ev.ctrlKey) {
-				this.savePermaLink();
-				ev.preventDefault();
-			}
-			else if (ev.key === "F2") {
-				this.code.focus();
-				ev.preventDefault();
-			}
-			else if (ev.key === "F4") {
-				this.input.focus();
-				ev.preventDefault();
-			}
-			else if (ev.key === "F8") {
-				this.munge();
-				ev.preventDefault();
-			}
+			else if (ev.key === "s" && ev.ctrlKey) this.savePermaLink();
+			else if (ev.key === "F2") this.code.focus();
+			else if (ev.key === "F4") this.input.focus();
+			else if (ev.key === "F8") this.munge();
+			else return;
+
+			ev.preventDefault();
 		});
 	}
 
@@ -133,10 +125,15 @@ export class MungerApp extends RedactioComponent {
 
 	loadPermaLink() {
 		try {
-			if (location.hash.length < 2) return;
-			const state = decodePermalink(location.hash);
-			this.code.value = state.munger;
-			this.input.value = state.input;
+			if (location.hash.length <= 1 ) {
+				this.code.value = "";
+				this.input.value = "";
+			} 
+			else {
+				const state = decodePermalink(location.hash);
+				this.code.value = state.munger;
+				this.input.value = state.input;
+			}
 		}
 		catch (ex) {
 			console.error(ex);

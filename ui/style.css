@@ -26,6 +26,7 @@ textarea {
 	width: 100%;
 	min-height: 2em;
 	max-height: 50vh;
+	tab-size: 4;
 }
 
 button {
@@ -56,6 +57,10 @@ a {
 	margin: 1em;
 }
 
+#app-inputs h2 {
+	line-height: 2;
+}
+
 h2 {
 	margin: 0.5em 0 0.2em;
 }
@@ -68,7 +73,7 @@ h2 {
 }
 
 article {
-	max-width: 40em;
+	max-width: 48em;
 	margin: 0 auto;
 }
 
