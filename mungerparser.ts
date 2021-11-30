@@ -210,7 +210,9 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		namedMungers.set(named.name, named.munger);
 	}
 
+	const EOF = /$/y;
 	const munger = parseMunger();
 	if (munger == null) fail(`Expected munger definition`);
+	if (!tryParse(EOF)) fail(`Expected EOF following munger`);
 	return { munger, named: namedMungers };
 }

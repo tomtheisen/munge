@@ -97,12 +97,14 @@ export class MungerApp extends RedactioComponent {
 
 	munge() {
 		this.saveState();
+		const start = new Date
 		try {
 			const parsed = parse(this.code.value);
 			this.refs.codeError.hidden = true;
 			const output = munge(this.input.value, parsed.munger, parsed.named);
 			this.refs.output.innerText = output;
 			this.refs.outputPanel.hidden = false;
+			console.log(`elapsed: ${ new Date().valueOf() - start.valueOf() } ms`);
 		}
 		catch (er: any) {
 			if (er instanceof ParseFailure) {
