@@ -29,9 +29,20 @@ export class AutoSizingTextArea extends RedactioComponent {
 	keydown(ev: KeyboardEvent) {
 		if(ev.key === "Tab") {
 			ev.preventDefault();
-			const pos = this.selectionStart;
-			this.value = this.value.substring(0, pos) + "\t" + this.value.substring(pos);
-			this.selectionEnd = this.selectionStart = pos + 1;
+			if (this.selectionStart == this.selectionEnd) {
+				if (ev.shiftKey) {
+					const pos = this.selectionStart, nl = this.value.lastIndexOf("\n", pos);
+					if (this.value[nl + 1] === "\t") {
+						this.value = this.value.substring(0, nl + 1) + this.value.substring(nl + 2);
+						this.selectionEnd = this.selectionStart = pos - 1;
+					}
+				}
+				else {
+					const pos = this.selectionStart;
+					this.value = this.value.substring(0, pos) + "\t" + this.value.substring(pos);
+					this.selectionEnd = this.selectionStart = pos + 1;
+				}
+			}
 		}
 	}
 

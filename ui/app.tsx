@@ -28,7 +28,7 @@ export class MungerApp extends RedactioComponent {
 						<h2>
 							Input Document
 							&nbsp;<small class="faint">(<kbd>F4</kbd>)</small> 
-							&nbsp;<button title="Ctrl + Enter" onclick={() => this.munge()}>▶ Munge <small>(F8)</small></button>
+							&nbsp;<button onclick={() => this.munge()}>▶ Munge <small>(Ctrl + ↲)</small></button>
 						</h2>
 						<AutoSizingTextArea ref="input" />
 					</div>
@@ -48,7 +48,6 @@ export class MungerApp extends RedactioComponent {
 			else if (ev.key === "s" && ev.ctrlKey) this.savePermaLink();
 			else if (ev.key === "F2") this.code.focus();
 			else if (ev.key === "F4") this.input.focus();
-			else if (ev.key === "F8") this.munge();
 			else return;
 
 			ev.preventDefault();
@@ -127,7 +126,8 @@ export class MungerApp extends RedactioComponent {
 
 	loadPermaLink() {
 		try {
-			if (location.hash.length <= 1 ) {
+			if (location.hash.length <= 1) return;
+			else if (location.hash.length == 2 ) {
 				this.code.value = "";
 				this.input.value = "";
 			} 
