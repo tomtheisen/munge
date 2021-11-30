@@ -57,6 +57,10 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>=</code></dt>
 						<dd>Pop two values.  Push 0 or 1 depending on the comparison of the two.</dd>
 					
+					<dt><code>&lt;&lt;</code></dt>
+					<dt><code>&gt;&gt;</code></dt>
+						<dd>Pop two values.  Push 0 or 1 depending on the comparison of the two, treating them as numbers.</dd>
+					
 					<dt><code>+</code></dt>
 					<dt><code>-</code></dt>
 					<dt><code>*</code></dt>

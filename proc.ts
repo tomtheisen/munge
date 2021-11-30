@@ -91,6 +91,8 @@ export class Proc {
 						break;
 					case '>': push(pop(1) > pop() ? 1 : 0); break;
 					case '<': push(pop(1) < pop() ? 1 : 0); break;
+					case '>>': push(Number(pop(1)) > Number(pop()) ? 1 : 0); break;
+					case '<<': push(Number(pop(1)) < Number(pop()) ? 1 : 0); break;
 					case '=': push(pop() == pop() ? 1 : 0); break;
 					case '+': push(Number(pop()) + Number(pop())); break;
 					case '-': push(Number(pop(1)) - Number(pop())); break;
