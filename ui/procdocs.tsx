@@ -100,6 +100,8 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>uncons(x)</code></dt>
 					<dt><code>pop(x)</code></dt>
 						<dd>Push a value removed from the beginning or end of a named array.</dd>
+					<dt><code>empty(x)</code></dt>
+						<dd>Remove all elements from named array.</dd>
 					
 					<dt><code>rev(x)</code></dt>
 						<dd>Reverse a named array in place.  Does not touch the stack.</dd>

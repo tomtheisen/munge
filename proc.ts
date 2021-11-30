@@ -54,7 +54,7 @@ export class Proc {
 				push(instr);
 			else if (instr.startsWith('"'))
 				push(JSON.parse(instr));
-			else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat|inc|dec)\((\w+)\)$/.exec(instr)) {
+			else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat|inc|dec|empty)\((\w+)\)$/.exec(instr)) {
 				instructions.unshift(JSON.stringify(match[2]), match[1]);
 			}
 			else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -68,7 +68,13 @@ export class Proc {
 					case 'copy': push(peek()); break;
 					case 'drop': pop(); break;
 					case 'clear': stack.splice(0); break;
-					case 'dump': console.log({ instructions, stack, ctx }); break;
+					case 'dump': console.log(JSON.parse(JSON.stringify({ 
+						instructions, 
+						stack, 
+						arrays: [...ctx.arrays.entries()],
+						registers: [...ctx.registers.entries()],
+						mungers: [...ctx.mungers.entries()],
+					}))); break;
 					case 'i': push(input.index); break;
 
 					case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
@@ -142,6 +148,7 @@ export class Proc {
 					case 'uncons': push(ctx.arrays.get(pop())?.shift() ?? ""); break;
 					case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
 					case 'rev': ctx.arrays.get(pop())?.reverse(); break;
+					case 'empty': ctx.arrays.set(pop(), []); break;
 
 					case 'if': {
 						const condition = pop(), then = getBlock(), else_ = tryGetBlock();
