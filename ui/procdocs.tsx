@@ -11,7 +11,7 @@ export class ProcDocs extends RedactioComponent {
 				<p>
 					Procs operate on a stack.  All values are strings.  
 					Some instructions operate on numbers, but they're really just strings like <code>"123"</code>.
-					There are two spaces for named variables.
+					There are two namespaces for variables.
 					One for normal string variables, and another for arrays of strings.
 				</p>
 				<p>                    

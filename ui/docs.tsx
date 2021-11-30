@@ -63,7 +63,6 @@ export class MungerDocs extends RedactioComponent {
 						There are also regular expression locators, using mostly javascript syntax.
 						The <code>ism</code> flags are supported. 
 						The <code>g</code> flag is implied.&nbsp;
-						<code>all</code> is shorthand for <code>/.*/s</code>.
 					</p>
 					<MungeExample input="abc 123 def 456" munger={`/\\d/ => "_"`} />
 				</section>
@@ -103,8 +102,8 @@ export class MungerDocs extends RedactioComponent {
 				<h2 id="first">First-only rulesets</h2>
 				<section>
 					<p>
-						There are a couple of ways to change the behavior of a ruleset.
-						A <dfn>first-only ruleset</dfn> only applies the the first rule that matches, scanning in document order.
+						A <dfn>first-only ruleset</dfn> applies its rules differently.
+						It only applies the the first rule that matches, scanning in document order.
 						After that rule is applied, no further munging is performed.
 						First-only rulesets are expressed by adding a preceding 1: <code>1( [rules here] )</code>
 					</p>
@@ -133,8 +132,8 @@ export class MungerDocs extends RedactioComponent {
 				<section>
 					<p>
 						A <dfn>repeater</dfn> is a decorated munger.
-						You can preced any other munger with a <code>@</code>, and it will become a repeater.
-						The at symbol looks like a wheel to me, just rolling and rolling.
+						You can precede any other munger with a <code>@</code>, and it will become a repeater.
+						<code>@</code> like a wheel to me, just rolling and rolling.
 						A repeater applies repeatedly to its input until a fixed point is reached.
 						It's not too hard to make an infinite loop with these.
 					</p>
@@ -179,7 +178,7 @@ export class MungerDocs extends RedactioComponent {
 					<p>
 						There's a <dfn>side effect</dfn> decoration you can use on any munger if you only want to use it for side effects.
 						This is generally most useful if you have procs that are setting variables or something that you're going to use later.
-						Preced any munger with `fx`, and it won't actually do any replacement.
+						Precede any munger with `fx`, and it won't actually do any replacement.
 					</p>
 					<MungeExample 
 						input={`
