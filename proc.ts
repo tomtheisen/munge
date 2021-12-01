@@ -100,6 +100,7 @@ export class Proc {
 					case '*': push(Number(pop()) * Number(pop())); break;
 					case '/': push(Number(pop(1)) / Number(pop())); break;
 					case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
+					case 'floor': push(Math.floor(Number(pop()))); break;
 
 					case 'not': push(Number(pop()) ? 0 : 1); break;
 					case 'or': {
@@ -118,6 +119,8 @@ export class Proc {
 					case 'take': push(pop(1).substring(0, Number(pop()))); break;
 					case 'ord': push(pop().codePointAt(0) ?? 0); break;
 					case 'chr': push(String.fromCodePoint(Number(pop()))); break;
+					case 'hex': push(Number(pop()).toString(16)); break;
+					case 'unhex': push(parseInt(pop(), 16)); break;
 
 					case 'set': ctx.registers.set(pop(), peek()); break;
 					case 'get': push(ctx.registers.get(pop()) ?? ""); break;

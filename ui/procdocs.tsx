@@ -67,6 +67,9 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>/</code></dt>
 					<dt><code>%</code></dt>
 						<dd>Pop two values.  Push the result of an arithmetic operation.</dd>
+
+					<dt><code>floor</code></dt>
+						<dd>Pop a number.  Push its numeric floor.</dd>
 					
 					<dt><code>not</code></dt>
 						<dd>Pop a value.  Push 0 if it's truthy, or 1 otherwise.</dd>
@@ -91,6 +94,9 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>ord</code></dt>
 					<dt><code>chr</code></dt>
 						<dd>Convert between a character and the corresponding unicode codepoint.</dd>
+					<dt><code>hex</code></dt>
+					<dt><code>unhex</code></dt>
+						<dd>Convert between decimal and hexadecimal representation. "255" &lt;-&gt; "ff"  </dd>
 					<dt><code>set(x)</code></dt>
 					<dt><code>get(x)</code></dt>
 						<dd>Gets or sets a named variable.</dd>
