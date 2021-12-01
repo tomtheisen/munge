@@ -180,6 +180,16 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return new Last(rule);
 	}
 
+	let namedMungers = new Map<string, Munger>();
+	const NamedMungerRef = /do\((\w+)\)/y
+	function parseNamedMungerRef(): Munger | undefined {
+		const match = tryParse(NamedMungerRef);
+		if (match == null) return undefined;
+		const name = match[1];
+		if (!namedMungers.has(name)) fail(`Undeclared munger reference: '${ name }'`);
+		return namedMungers.get(name);
+	}
+
 	function parseMunger(): Munger | undefined {
 		return parseRuleset()
 			?? parseSequence()
@@ -189,7 +199,8 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 			?? parseEffect()
 			?? parseProc()
 			?? parseSingleRule()
-			?? parseDoubleStringLiteral();
+			?? parseDoubleStringLiteral()
+			?? parseNamedMungerRef();
 	}
 
 	const MungerDeclaration = /def\((\w+)\)/y;
@@ -202,7 +213,6 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return { name, munger };
 	}
 
-	let namedMungers = new Map<string, Munger>();
 	while (true) {
 		const named = parseMungerDef();
 		if (named == null) break;

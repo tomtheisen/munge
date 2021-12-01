@@ -41,6 +41,7 @@ export class MungerDocs extends RedactioComponent {
 						<li><a href="#effects">Side-effect decorator</a></li>
 						<li><a href="#last">Last decorator</a></li>
 						<li><a href="#proc">Proc</a></li>
+						<li><a href="#named">Named Reference</a></li>
 					</ul>
 				</section>
 				<h2 id="rule">Rules</h2>
@@ -197,13 +198,14 @@ export class MungerDocs extends RedactioComponent {
 						Prior to the munger, you can create one or more <dfn>named munger declarations</dfn>.
 						These can be referred to later.
 						These are <code>def(name)</code> followed by a munger.
+						You can invoke them using <code>do(name)</code>.
 					</p>
 					<MungeExample input = "abc123def567"
 						munger = {`
 							def(paren) { "(" _ ")" }
 							( ! enclose runs in parens
-								/\\d+/     => { do(paren) }
-								/[a-z]+/i => { do(paren) }
+								/\\d+/     => do(paren)
+								/[a-z]+/i => do(paren)
 							)`} />
 				</section>
 				<p>
