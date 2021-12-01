@@ -9,6 +9,19 @@ import { decodePermalink, makePermalink } from './permalinks.js';
 const MungerSourceKey = "MungerSource";
 const MungerDocKey = "MungerDoc";
 
+const formatMunger = parse(`
+	( ! format munger
+		/^\\s*(\\)|})/m => { 
+			dec(indent) 
+			"\\t" get(indent) rep $1
+		}
+		/^\\s*/m => { "\\t" get(indent) rep }
+		/\\(|{/ => fx { inc(indent) }
+		/\\)|}/ => fx { dec(indent) }
+		/(["'\\/])(\\\\.|.)*?\\1/ => ()
+		/\\s+$/m => ""
+	)`).munger;
+
 export class MungerApp extends RedactioComponent {
 	constructor() {
 		super(
@@ -21,7 +34,7 @@ export class MungerApp extends RedactioComponent {
 							&nbsp;<small><a href="?docs" target="_blank">?</a></small>
 							&nbsp;<small><a href="?#" target="_blank">New</a></small>
 						</h2>
-						<AutoSizingTextArea ref="code" />
+						<AutoSizingTextArea allowComments={true} ref="code" />
 						<div ref="codeError" class="error" hidden></div>
 					</div>
 					<div>
@@ -45,9 +58,13 @@ export class MungerApp extends RedactioComponent {
 
 		document.addEventListener("keydown", ev => {
 			if (ev.key === "Enter" && ev.ctrlKey) this.munge();
-			else if (ev.key === "s" && ev.ctrlKey) this.savePermaLink();
+			else if (ev.code === "KeyS" && ev.ctrlKey) this.savePermaLink();
 			else if (ev.key === "F2") this.code.focus();
 			else if (ev.key === "F4") this.input.focus();
+			else if (ev.code === "KeyF" && ev.ctrlKey && ev.shiftKey) {
+				this.code.value = munge(this.code.value, formatMunger, new Map);
+				this.code.focus();
+			}
 			else return;
 
 			ev.preventDefault();

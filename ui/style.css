@@ -70,6 +70,7 @@ h2 {
 	background: #234;
 	padding: 1em;
 	font-family: monospace;
+	tab-size: 4;
 }
 
 article {
