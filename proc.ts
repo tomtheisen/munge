@@ -1,4 +1,4 @@
-import { Match, Context } from "./munger";
+import { Match, Context, munge } from "./munger";
 
 export class Proc {
 	private instructions: (string | Proc)[];
@@ -179,9 +179,10 @@ export class Proc {
 
 					case 'do': {
 						const name = pop(), target = ctx.mungers.get(name);
-						if (!(target instanceof Proc))
-							throw Error(`Can't call non-proc name '${name}: ${target}'`);
-						target.evaluate(input, ctx, stack);
+						if (target == null) throw Error(`Named munger reference: '${ name }' could not be resolved.`);
+						if (target instanceof Proc) target.evaluate(input, ctx, stack);
+						else if (typeof target === 'string') push(target);
+						else push(target.apply({ ...input, value: pop() }, ctx));
 						break;
 					}
 

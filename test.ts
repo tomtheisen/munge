@@ -321,3 +321,10 @@ function singleRule(find: Locator, replace: Munger) {
     const expected = "12a12b12";
     testCase(input, replace, expected);
 }
+
+{
+    const input = "abc"
+    const {munger: replace} = parse(`('' => "<" '' => ">" )`);
+    const expected = "<>a<>b<>c<>";
+    testCase(input, replace, expected);
+}
