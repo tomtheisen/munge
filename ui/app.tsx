@@ -32,7 +32,7 @@ export class MungerApp extends RedactioComponent {
 						<h2>Munger Source
 							&nbsp;<small class="faint">(<kbd>F2</kbd>)</small> 
 							&nbsp;<small><a href="?docs" target="_blank">?</a></small>
-							&nbsp;<small><a href="?#" target="_blank">New</a></small>
+							&nbsp;<small><a href="?" target="_blank">New</a></small>
 						</h2>
 						<AutoSizingTextArea allowComments={true} ref="code" />
 						<div ref="codeError" class="error" hidden></div>
@@ -94,15 +94,15 @@ export class MungerApp extends RedactioComponent {
 	}
 
 	saveState() {
-		localStorage.setItem(MungerSourceKey, this.code.value);
-		localStorage.setItem(MungerDocKey, this.input.value);
+		sessionStorage.setItem(MungerSourceKey, this.code.value);
+		sessionStorage.setItem(MungerDocKey, this.input.value);
 	}
 
 	loadState() {
-		const savedSource = localStorage.getItem(MungerSourceKey);
+		const savedSource = sessionStorage.getItem(MungerSourceKey);
 		if (savedSource)
 			this.code.value = savedSource;
-		const savedInput = localStorage.getItem(MungerDocKey);
+		const savedInput = sessionStorage.getItem(MungerDocKey);
 		if (savedInput)
 			this.input.value = savedInput;
 	}
@@ -144,10 +144,6 @@ export class MungerApp extends RedactioComponent {
 	loadPermaLink() {
 		try {
 			if (location.hash.length <= 1) return;
-			else if (location.hash.length == 2 ) {
-				this.code.value = "";
-				this.input.value = "";
-			} 
 			else {
 				const state = decodePermalink(location.hash);
 				this.code.value = state.munger;
