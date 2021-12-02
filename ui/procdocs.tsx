@@ -110,6 +110,9 @@ export class ProcDocs extends RedactioComponent {
 						<dd>Push a value removed from the beginning or end of a named array.</dd>
 					<dt><code>empty(x)</code></dt>
 						<dd>Remove all elements from named array.</dd>
+					<dt><code>count(x)</code></dt>
+						<dd>Push the length of a named array.</dd>
+					
 					
 					<dt><code>rev(x)</code></dt>
 						<dd>Reverse a named array in place.  Does not touch the stack.</dd>

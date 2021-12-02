@@ -8,6 +8,10 @@ html {
 	tab-size: 4;
 }
 
+body {
+	margin: 0;
+}
+
 .faint {
 	color: #678;
 }
@@ -54,7 +58,7 @@ a {
 #app-inputs > * {
 	flex-grow: 1;
 	min-width: calc(min(36em, 100vw - 5em));
-	margin: 1em;
+	margin: 0 1em;
 }
 
 #app-inputs h2 {
