@@ -5,6 +5,7 @@ html {
 	padding: 1em 2em 2em;
 	position: relative;
 	min-height: calc(100vh - 3em);
+	tab-size: 4;
 }
 
 .faint {
@@ -26,7 +27,6 @@ textarea {
 	width: 100%;
 	min-height: 2em;
 	max-height: 50vh;
-	tab-size: 4;
 }
 
 button {
@@ -70,7 +70,6 @@ h2 {
 	background: #234;
 	padding: 1em;
 	font-family: monospace;
-	tab-size: 4;
 }
 
 article {

@@ -51,21 +51,46 @@ export class MungerDocs extends RedactioComponent {
 						They go in that order with <code>=&gt;</code> in between them.
 					</p>
 				</section>
-				<h2 id="locator">Locator</h2>
+				<h2 id="locator">Locators</h2>
+				<h3>Literal locator</h3>
 				<section>
 					<p>
 						A <dfn>locator</dfn> finds some particular substring of the input to manipulate.
-						There are two kinds.  For now.  
+						There are three kinds.  
 						The simplest locator is the literal.  
 						It's enclosed in single quotes.
 					</p>
 					<MungeExample input={"Once you munge,\nyou never go back"} munger={`' ' => ""`} />
+				</section>
+				<h3>RegExp locator</h3>
+				<section>
 					<p>
-						There are also regular expression locators, using mostly javascript syntax.
+						There are also <dfn>regular expression locators</dfn>, using mostly javascript syntax.
 						The <code>ism</code> flags are supported. 
 						The <code>g</code> flag is implied.&nbsp;
 					</p>
 					<MungeExample input="abc 123 def 456" munger={`/\\d/ => "_"`} />
+				</section>
+				<h3>Named value locator</h3>
+				<section>
+					<p>
+						The fanciest of the locators is the <dfn>named value locator</dfn>.
+						This finds an occurrence of a named value stored by a <a href="#proc">proc</a>.
+						The actual value to match is resolved at the start of the start of the 
+						enclosing <a href="#ruleset">ruleset</a> or other munger.
+					</p>
+					<MungeExample input="f->m:buffer" munger={
+						`
+						(
+							/(\w)->(\w)/ => fx { 
+								$1 set(find) 
+								$2 set(replace) 
+							}
+							/.+/ => 
+								! we use this extra indirection
+								! to delay resolution of get(find)
+								get(find) => { get(replace) }
+						)`} />
 				</section>
 				<h2 id="literal">Literal</h2>
 				<section>

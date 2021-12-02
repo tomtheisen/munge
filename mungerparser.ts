@@ -70,16 +70,17 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		if (match) return new RegExp(match[1], match[2] + 'g');
 	}
 
-	const Wholesale = /all/y;
-	function parseWholesale(): RegExp | undefined {
-		if (!tryParse(Wholesale)) return undefined;
-		return /^.*/gs;
+	const NamedLocator = /get\((\w+)\)/y;
+	function parseNamedLocator() {
+		const match = tryParse(NamedLocator);
+		if (match == null) return undefined;
+		return { locatorName: match[1] };
 	}
 
 	function parseLocator(): Locator | undefined {
 		return parseSingleStringLiteral() 
 			?? parseRegExpLiteral()
-			?? parseWholesale();
+			?? parseNamedLocator();
 	}
 
 	const GoesTo = /=>/y;

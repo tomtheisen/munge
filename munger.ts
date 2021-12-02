@@ -1,6 +1,7 @@
 import { Proc } from "./proc.js";
 
-export type Locator = string | RegExp;
+export type NamedLocator = { locatorName: string };
+export type Locator = string | RegExp | NamedLocator;
 export type Rule = { locator: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | SideEffects;
 export enum Which { FirstOnly, All }
@@ -35,12 +36,17 @@ function nextMatch(input: string, locator: Locator, startFrom: number): Match | 
 		const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
 		if (index >= 0) return { index, value: locator, groups: [] };
 	}
-	if (locator instanceof RegExp) {
+	else if (locator instanceof RegExp) {
 		if (!locator.global) throw "gotta be global";
 		locator.lastIndex = startFrom;
 		const match = locator.exec(input);
 		if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
 	}
+	else throw `Unimplemented locator type ${ locator }`;
+}
+
+function isNamed(locator: Locator): locator is NamedLocator {
+	return typeof locator === "object" && "locatorName" in locator;
 }
 
 export class Ruleset {
@@ -55,18 +61,21 @@ export class Ruleset {
 	apply(input: Match, ctx: Context): string {
 		let startOfMatch = -1, endOfMatch = 0, output: string[] = [], lastRuleIndex = -1;
 		let ruleIndex: number, bestMatch: Match | undefined;
-		let ruleMatches: (Match | undefined)[] = this.rules.map(() => ({ value: "", index: -1, groups: [] }));
+		const locators = this.rules
+			.map(r => isNamed(r.locator) ? ctx.registers.get(r.locator.locatorName) : r.locator)
+			.filter((r): r is Exclude<Locator, NamedLocator> => r != null);
+		let ruleMatches: (Match | undefined)[] = locators.map(() => ({ value: "", index: -1, groups: [] }));
 
 		for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
 			bestMatch = undefined; 
 			ruleIndex = -1;
-			for (let i = 0; i < this.rules.length; i++) {
+			for (let i = 0; i < locators.length; i++) {
 				let ruleMatch = ruleMatches[i];
 				if (ruleMatch == null) continue;
 				const searchStart = i <= lastRuleIndex 
 					? Math.max(startOfMatch + 1, endOfMatch) 
 					: endOfMatch;
-				ruleMatches[i] = ruleMatch = nextMatch(input.value, this.rules[i].locator, searchStart);
+				ruleMatches[i] = ruleMatch = nextMatch(input.value, locators[i], searchStart);
 				if (ruleMatch == null) continue;
 				if (bestMatch == null || ruleMatch.index < bestMatch.index) {
 					bestMatch = ruleMatch;
@@ -146,13 +155,19 @@ export class Last {
 		let lastMatch: Match | undefined = undefined;
 		let lastMatchPosition : number | undefined = undefined;
 
-		if (typeof this.rule.locator === "string") {
-			lastMatchPosition = input.lastIndexOf(this.rule.locator);
-			if (lastMatchPosition >= 0) lastMatch = { value: this.rule.locator, groups: [], index: 0 };
-		}
-		else for (let m of input.matchAll(this.rule.locator)) {
-			lastMatchPosition = m.index;
-			lastMatch = { value: m[0], groups: m.slice(1), index: 0 };
+		if (this.rule.locator instanceof RegExp) {
+			for (let m of input.matchAll(this.rule.locator)) {
+				lastMatchPosition = m.index;
+				lastMatch = { value: m[0], groups: m.slice(1), index: 0 };
+			}
+		} 
+		else {
+			const target = isNamed(this.rule.locator) 
+				? ctx.registers.get(this.rule.locator.locatorName) 
+				: this.rule.locator;
+			if (target == null) return input;
+			lastMatchPosition = input.lastIndexOf(target);
+			if (lastMatchPosition >= 0) lastMatch = { value: target, groups: [], index: 0 };
 		}
 
 		if (!lastMatch || lastMatchPosition == null) return input;
