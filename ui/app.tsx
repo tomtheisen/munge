@@ -11,15 +11,15 @@ const MungerDocKey = "MungerDoc";
 
 const formatMunger = parse(`
 	( ! format munger
-		/^\\s*(\\)|})/m => { 
+		/^(?: |\\t)*(\\)|})/m => { 
 			dec(indent) 
 			"\\t" get(indent) rep $1
 		}
-		/^\\s*/m => { "\\t" get(indent) rep }
+		/^(?: |\\t)*/m => { "\\t" get(indent) rep }
 		/\\(|{/ => fx { inc(indent) }
 		/\\)|}/ => fx { dec(indent) }
 		/(["'\\/])(\\\\.|.)*?\\1/ => ()
-		/\\s+$/m => ""
+		/(?: |\\t)+$/m => ""
 	)`).munger;
 
 export class MungerApp extends RedactioComponent {

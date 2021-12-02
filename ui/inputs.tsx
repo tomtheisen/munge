@@ -84,14 +84,35 @@ export class AutoSizingTextArea extends RedactioComponent {
 				else this.replaceSelection(/^(\s*)(?!$)/mg, "$1! ");
 			}
 		}
-		else if ((ev.key === "{" || ev.key === "(") && this.selection) {
+		else if (ev.key === "{" || ev.key === "(") {
 			ev.preventDefault();
-			const start = this.selectionStart, end = this.selectionEnd;
-			this.value = this.value.substring(0, start) 
-				+ ev.key + this.selection + {"(":")", "{":"}"}[ev.key]
-				+ this.value.substring(end);
-			this.selectionStart = start + 1;
-			this.selectionEnd = end + 1;
+			const close = {"(":")", "{":"}"}[ev.key];
+			if (this.selection) {
+				const start = this.selectionStart, end = this.selectionEnd;
+				this.value = this.value.substring(0, start) + ev.key + this.selection + close + this.value.substring(end);
+				this.selectionStart = start + 1;
+				this.selectionEnd = end + 1;
+			}
+			else {
+				const start = this.selectionStart;
+				this.value = this.value.substring(0, start) + ev.key + close + this.value.substring(start);
+				this.selectionStart = this.selectionEnd = start + 1; 
+			}
+		}
+		else if (ev.key === "}" || ev.key === ")") {
+			if (this.selection === "" && this.value[this.selectionStart] === ev.key) {
+				ev.preventDefault();
+				this.selectionStart = ++this.selectionEnd;
+			}
+		}
+		else if (ev.key === "Enter" && this.selection === "" && !ev.ctrlKey) {
+			ev.preventDefault();
+			const start = this.selectionStart;
+			let indentPattern = /\s*/y;
+			indentPattern.lastIndex = this.value.lastIndexOf("\n", start - 1) + 1;
+			const indent = indentPattern.exec(this.value)?.[0] ?? "";
+			this.value = this.value.substring(0, start) + "\n" + indent + this.value.substring(start);
+			this.selectionStart = this.selectionEnd = start + 1 + indent?.length;
 		}
 	}
 
