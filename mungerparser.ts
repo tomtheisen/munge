@@ -1,4 +1,4 @@
-import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects, Which } from './munger.js';
+import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
 import { Proc } from "./proc.js";
 
 export class ParseFailure {
@@ -96,10 +96,10 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 	function parseSingleRule(): Ruleset | undefined {
 		const rule = parseRule();
 		if (rule == null) return undefined;
-		return new Ruleset(Which.All, rule);
+		return new Ruleset(Number.POSITIVE_INFINITY, rule);
 	}
 
-	const RulesetOpen = /(1)?\(/y;
+	const RulesetOpen = /(\d+)?\(/y;
 	const RulesetClose = /\)/y;
 	function parseRuleset(): Ruleset | undefined {
 		let open = tryParse(RulesetOpen);
@@ -109,10 +109,10 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		while (rule = parseRule()) rules.push(rule);
 		if (!tryParse(RulesetClose)) fail(`Expected rule or ')'`);
 		
-		return new Ruleset(open[1] ? Which.FirstOnly : Which.All, ...rules);
+		return new Ruleset(open[1] ? Number(open[1]) : Number.POSITIVE_INFINITY, ...rules);
 	}
 
-	const SequenceOpen = /(1)?#\(/y;
+	const SequenceOpen = /(\d+)?#\(/y;
 	const SequenceClose = /\)/y;
 	function parseSequence(): Sequence | undefined {
 		let open = tryParse(SequenceOpen);
@@ -122,7 +122,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		while ((munger = parseMunger()) != null) mungers.push(munger);
 		if (!tryParse(SequenceClose)) fail(`Expected munger or ')'`);
 		
-		return new Sequence(open[1] ? Which.FirstOnly : Which.All, ...mungers);
+		return new Sequence(open[1] ? Number(open[1]) : Number.POSITIVE_INFINITY, ...mungers);
 	}
 
 	const ProcOpen = /{/y;
@@ -160,7 +160,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		if (!tryParse(EatPrefix)) return undefined;
 		const munger = parseMunger();
 		if (munger == null) fail(`Expected munger after 'eat' decorator`);
-		return new Sequence(Which.All, munger, "");
+		return new Sequence(Number.POSITIVE_INFINITY, munger, "");
 	}
 
 	const EffectPrefix = /fx\b/y;

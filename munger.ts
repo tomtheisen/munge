@@ -4,7 +4,6 @@ export type NamedLocator = { locatorName: string };
 export type Locator = string | RegExp | NamedLocator;
 export type Rule = { locator: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | SideEffects;
-export enum Which { FirstOnly, All }
 
 export type Context = {
 	registers: Map<string, string>;
@@ -52,10 +51,10 @@ function isNamed(locator: Locator): locator is NamedLocator {
 
 export class Ruleset {
 	rules: Rule[];
-	which: Which;
+	howMany: number;
 
-	constructor(which: Which, ...rules: Rule[]) {
-		this.which = which;
+	constructor(howMany: number, ...rules: Rule[]) {
+		this.howMany = howMany;
 		this.rules = rules;
 	}
 
@@ -67,7 +66,7 @@ export class Ruleset {
 			.filter((r): r is Exclude<Locator, NamedLocator> => r != null);
 		let ruleMatches: (LocatedMatch | undefined)[] = locators.map(() => ({ value: "", index: -1, groups: [] }));
 
-		for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
+		for (let matchCount = 0; endOfMatch <= input.value.length; ) {
 			bestMatch = undefined; 
 			ruleIndex = -1;
 			for (let i = 0; i < locators.length; i++) {
@@ -94,7 +93,7 @@ export class Ruleset {
 			startOfMatch = bestMatch.index;
 			endOfMatch = bestMatch.index + bestMatch.value.length;
 
-			if (this.which === Which.FirstOnly) break;
+			if (++matchCount === this.howMany) break;
 		}
 		return output.join('') + input.value.substring(endOfMatch);
 	}
@@ -123,18 +122,18 @@ export class Repeater {
 
 export class Sequence {
 	steps: Munger[];
-	which: Which;
+	howMany: number;
 
-	constructor(which: Which, ...steps: Munger[]) {
-		this.which = which;
+	constructor(howMany: number, ...steps: Munger[]) {
+		this.howMany = howMany;
 		this.steps = steps;
 	}
 
 	apply(match: Match, ctx: Context): string {
-		let input = match.value, i = 0;
+		let input = match.value, changes = 0;
 		for (let munger of this.steps) {
 			let next = mungeCore({ value: input, groups: [] }, munger, ctx);
-			if (this.which === Which.FirstOnly && next !== input) return next;
+			if (next !== input && ++changes === this.howMany) return next;
 			input = next;
 		}
 		return input;

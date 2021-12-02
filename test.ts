@@ -1,4 +1,4 @@
-import { munge, Ruleset, Which, Munger, Sequence, Last, Locator } from './munger.js';
+import { munge, Ruleset, Munger, Sequence, Last, Locator } from './munger.js';
 import { Proc } from "./proc.js";
 import { parse } from './mungerparser.js';
 
@@ -16,7 +16,7 @@ function testCase(input: string, munger: Munger, expected: string) {
 }
 
 function singleRule(find: Locator, replace: Munger) {
-    return new Ruleset(Which.All, { locator: find, replace });
+    return new Ruleset(Number.POSITIVE_INFINITY, { locator: find, replace });
 }
 
 {
@@ -28,7 +28,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "the foo the bar the foobar legend";
-    const replace = new Ruleset(Which.All, 
+    const replace = new Ruleset(Number.POSITIVE_INFINITY, 
         { locator: "foo", replace: "bar" },
         { locator: /bar/g, replace: "foo" });
     const expected = "the bar the foo the barfoo legend";
@@ -37,21 +37,21 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "gooooooooooooooooal";
-    const replace = new Ruleset(Which.FirstOnly, { locator: "oo", replace: "o" }).repeat();
+    const replace = new Ruleset(1, { locator: "oo", replace: "o" }).repeat();
     const expected = "goal";
     testCase(input, replace, expected);
 }
 
 {
     const input = "";
-    const replace = new Ruleset(Which.FirstOnly, { locator: /^$/g, replace: "something" });
+    const replace = new Ruleset(1, { locator: /^$/g, replace: "something" });
     const expected = "something";
     testCase(input, replace, expected);
 }
 
 {
     const input = "a";
-    const replace = new Ruleset(Which.FirstOnly, 
+    const replace = new Ruleset(1, 
         { locator: "a", replace: "b" },
         { locator: "a", replace: "c" });
     const expected = "b";
@@ -59,16 +59,16 @@ function singleRule(find: Locator, replace: Munger) {
 }
 
 {
-    const multipleTester = new Sequence(Which.All,
-        new Ruleset(Which.All,
+    const multipleTester = new Sequence(Number.POSITIVE_INFINITY,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: /[0369]/g, replace: "" },
             { locator: /[47]/g, replace: "1" },
             { locator: /[258]/g, replace: "11" },
         ),
-        new Ruleset(Which.All,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: "111", replace: "" }
         ).repeat(),
-        new Ruleset(Which.All,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: /.+/g, replace: "not" },
             { locator: /^$/g, replace: "multiple of 3" })
     );
@@ -80,19 +80,19 @@ function singleRule(find: Locator, replace: Munger) {
 }
 
 {
-    const multipleTester = new Sequence(Which.All,
-        new Ruleset(Which.FirstOnly,
-            { locator: /[02468]$/g, replace: new Ruleset(Which.FirstOnly, { locator: /$/g, replace: "even" }) }
+    const multipleTester = new Sequence(Number.POSITIVE_INFINITY,
+        new Ruleset(1,
+            { locator: /[02468]$/g, replace: new Ruleset(1, { locator: /$/g, replace: "even" }) }
         ),
-        new Ruleset(Which.All,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: /[0369]/g, replace: "" },
             { locator: /[47]/g, replace: "1" },
             { locator: /[258]/g, replace: "11" },
         ),
-        new Ruleset(Which.All,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: "111", replace: "" }
         ).repeat(),
-        new Ruleset(Which.FirstOnly,
+        new Ruleset(1,
             { locator: /^even$/g, replace: "multiple of 6" },
             { locator: /.*/g, replace: "not" })
     );
@@ -105,7 +105,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = 'a,,b,"c,d",e';
-    const replace = new Ruleset(Which.All,
+    const replace = new Ruleset(Number.POSITIVE_INFINITY,
         { locator: /".*?"/g, replace: singleRule(/^"|"$/g, "") },
         { locator: ',', replace: "\n" });
     const expected = "a\n\nb\nc,d\ne";
@@ -121,8 +121,8 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "2,11,5,4,3";
-    const replace = new Sequence(Which.All,
-        new Ruleset(Which.All,
+    const replace = new Sequence(Number.POSITIVE_INFINITY,
+        new Ruleset(Number.POSITIVE_INFINITY,
             { locator: /\d+/g, replace: new Proc('_ "m" get max "m" set drop') },
             { locator: ',', replace: '' }),
         new Proc('"m" get')
@@ -140,7 +140,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "3,2,5,4,11,3";
-    const replace = new Sequence(Which.All,
+    const replace = new Sequence(Number.POSITIVE_INFINITY,
         singleRule(/\d+/g, new Proc('_ "m" get max "m" set _')),
         singleRule(/\d+/g, new Proc('"m" get')));
     const expected = "11,11,11,11,11,11";
@@ -152,7 +152,7 @@ function singleRule(find: Locator, replace: Munger) {
         a
         bbbb
         cc`.replace(/\r?\n/, '');
-    const replace = new Sequence(Which.All,
+    const replace = new Sequence(Number.POSITIVE_INFINITY,
         singleRule(/.+/g, new Proc('_ len "maxlen" get max "maxlen" set drop _')),
         singleRule(/.+/g, new Proc('_ "maxlen" get lpad')));
     const expected = `
@@ -171,7 +171,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "<outer><inner/><inner><child/></inner></outer>";
-    const replace = new Ruleset(Which.All,
+    const replace = new Ruleset(Number.POSITIVE_INFINITY,
         { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
         { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
         { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\\n"') });
@@ -188,7 +188,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "<outer>                             <inner/><inner><child/></inner></outer>";
-    const replace = new Ruleset(Which.All,
+    const replace = new Ruleset(Number.POSITIVE_INFINITY,
         { locator: /\s+/g, replace: '' },
         { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
         { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
@@ -213,7 +213,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "0x100 is two five six while 0xffff is six five five three six, 0xDEAD";
-    const replace = singleRule(/0x[0-9a-f]+/ig, new Ruleset(Which.All,
+    const replace = singleRule(/0x[0-9a-f]+/ig, new Ruleset(Number.POSITIVE_INFINITY,
         { locator: '0x', replace: new Proc('0 set(h) clear') },
         { locator: /./g, replace: new Proc('get(h) 16 * "0123456789abcdef" _ lower index + set(h) clear') },
         { locator: /$/g, replace: new Proc('get(h)') }));
@@ -230,7 +230,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "3 + 4 * 5";
-    const replace = new Sequence(Which.FirstOnly,
+    const replace = new Sequence(1,
         singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
         singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),
     );
@@ -240,7 +240,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "2 * 3 + 4 * 5";
-    const replace = new Sequence(Which.FirstOnly,
+    const replace = new Sequence(1,
         singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
         singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),
     ).repeat();
@@ -250,7 +250,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "2 * (3 + 4) * 5";
-    const replace = new Sequence(Which.FirstOnly,
+    const replace = new Sequence(1,
         singleRule(/\(\d+\)/g, singleRule(/\(|\)/g, '')),
         singleRule(/(\d+) *\* (\d+)/g, new Proc('$1 $2 *')),
         singleRule(/(\d+) *\+ (\d+)/g, new Proc('$1 $2 +')),

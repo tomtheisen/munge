@@ -129,11 +129,11 @@ export class MungerDocs extends RedactioComponent {
 				<section>
 					<p>
 						A <dfn>first-only ruleset</dfn> applies its rules differently.
-						It only applies the the first rule that matches, scanning in document order.
-						After that rule is applied, no further munging is performed.
-						First-only rulesets are expressed by adding a preceding 1: <code>1( [rules here] )</code>
+						It only applies only a certain number of rules, scanning in document order.
+						After the specified number of rule applications are done, no further munging is performed.
+						First-only rulesets are expressed by adding a preceding number: <code>1( [rules here] )</code>
 					</p>
-					<MungeExample input="foo foo foo" munger={`1( 'foo' => "bar" )`}/>
+					<MungeExample input="foo foo foo" munger={`2( 'foo' => "bar" )`}/>
 				</section>
 				<h2 id="sequence">Sequences</h2>
 				<section>
@@ -151,7 +151,8 @@ export class MungerDocs extends RedactioComponent {
 						)`} />
 					<p>
 						It's also possible to combine a sequenced and first-only ruleset this way.
-						These apply only the first rule to match, in declaration order, instead of document order.  The prefix is <code>1#</code>.
+						These apply only the first rule to match, in declaration order, instead of document order.  
+						The prefix is like <code>1#</code>.
 					</p>
 				</section>
 				<h2 id="repeater">Repeaters</h2>
