@@ -282,14 +282,14 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "pile of junk";
-    const { munger: replace } = parse('{ 10 times { i } }');
+    const { munger: replace } = parse('{ 0 9 times { copy 1 + } }');
     const expected = "0123456789";
     testCase(input, replace, expected);
 }
 
 {
     const input = "7";
-    const { munger: replace } = parse('{ 1 _ times { i 1 + * } }');
+    const { munger: replace } = parse('{ 1 set(n) _ 1 - times { inc(n) get(n) * } }');
     const expected = "5040";
     testCase(input, replace, expected);
 }

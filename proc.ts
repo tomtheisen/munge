@@ -75,7 +75,6 @@ export class Proc {
 						registers: [...ctx.registers.entries()],
 						mungers: [...ctx.mungers.entries()],
 					}))); break;
-					case 'i': push(input.index); break;
 
 					case 'group': push(input.groups?.[Number(pop()) - 1] ?? ""); break;
 
@@ -163,16 +162,15 @@ export class Proc {
 					}
 					case 'for': {
 						const arr = ctx.arrays.get(pop()) ?? [], block = getBlock();
-						let i = 0;
 						for (const e of arr) {
-							block.evaluate({ value: e, index: i++, groups: [] }, ctx, stack);
+							block.evaluate({ value: e, groups: [] }, ctx, stack);
 						}
 						break;
 					}
 					case 'times': {
 						const times = Number(pop()), block = getBlock();
 						for (let i = 0; i < times; i++) {
-							block.evaluate({ value: input.value, index: i, groups: input.groups }, ctx, stack);
+							block.evaluate({ value: input.value, groups: input.groups }, ctx, stack);
 						}
 						break;
 					}

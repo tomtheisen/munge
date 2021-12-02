@@ -45,8 +45,6 @@ export class ProcDocs extends RedactioComponent {
 						<dd>Empty the whole stack.</dd>
 					<dt><code>len</code></dt>
 						<dd>Push the length of a string.</dd>
-					<dt><code>i</code></dt>
-						<dd>Push the iteration index.  There are a few iteration contexts.</dd>
 					
 					<dt><code>min</code></dt>
 					<dt><code>max</code></dt>

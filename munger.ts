@@ -13,16 +13,17 @@ export type Context = {
 };
 
 export type Match = {
-	index: number;
 	value: string;
 	groups: string[];
 };
+
+export type LocatedMatch = Match & { index: number; };
 
 const emptyMap = new Map;
 export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger> = emptyMap) {
 	const lineNormalized = input.replace(/\r\n?/g, "\n");
 	const newContext = { registers: new Map, arrays: new Map, mungers };
-	return mungeCore({ value: lineNormalized, groups: [], index: 0 }, munger, newContext);
+	return mungeCore({ value: lineNormalized, groups: [] }, munger, newContext);
 }
 
 function mungeCore(input: Match, munger: Munger, ctx: Context): string {
@@ -31,7 +32,7 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
 	else return munger.apply(input, ctx);
 }
 
-function nextMatch(input: string, locator: Locator, startFrom: number): Match | undefined {
+function nextMatch(input: string, locator: Locator, startFrom: number): LocatedMatch | undefined {
 	if (typeof locator === 'string') {
 		const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
 		if (index >= 0) return { index, value: locator, groups: [] };
@@ -60,11 +61,11 @@ export class Ruleset {
 
 	apply(input: Match, ctx: Context): string {
 		let startOfMatch = -1, endOfMatch = 0, output: string[] = [], lastRuleIndex = -1;
-		let ruleIndex: number, bestMatch: Match | undefined;
+		let ruleIndex: number, bestMatch: LocatedMatch | undefined;
 		const locators = this.rules
 			.map(r => isNamed(r.locator) ? ctx.registers.get(r.locator.locatorName) : r.locator)
 			.filter((r): r is Exclude<Locator, NamedLocator> => r != null);
-		let ruleMatches: (Match | undefined)[] = locators.map(() => ({ value: "", index: -1, groups: [] }));
+		let ruleMatches: (LocatedMatch | undefined)[] = locators.map(() => ({ value: "", index: -1, groups: [] }));
 
 		for (let matchCount = 0; endOfMatch <= input.value.length; ++matchCount) {
 			bestMatch = undefined; 
@@ -111,10 +112,10 @@ export class Repeater {
 	}
 
 	apply(input: Match, ctx: Context): string {
-		let last = input.value, output = mungeCore(input, this.munger, ctx), i = 0;
+		let last = input.value, output = mungeCore(input, this.munger, ctx);
 		while (last !== output) {
 			last = output;
-			output = mungeCore({ value: output, groups: [], index: i++ }, this.munger, ctx);
+			output = mungeCore({ value: output, groups: [] }, this.munger, ctx);
 		}
 		return output;
 	}
@@ -132,7 +133,7 @@ export class Sequence {
 	apply(match: Match, ctx: Context): string {
 		let input = match.value, i = 0;
 		for (let munger of this.steps) {
-			let next = mungeCore({ value: input, groups: [], index: i++ }, munger, ctx);
+			let next = mungeCore({ value: input, groups: [] }, munger, ctx);
 			if (this.which === Which.FirstOnly && next !== input) return next;
 			input = next;
 		}
@@ -158,7 +159,7 @@ export class Last {
 		if (this.rule.locator instanceof RegExp) {
 			for (let m of input.matchAll(this.rule.locator)) {
 				lastMatchPosition = m.index;
-				lastMatch = { value: m[0], groups: m.slice(1), index: 0 };
+				lastMatch = { value: m[0], groups: m.slice(1) };
 			}
 		} 
 		else {
@@ -167,7 +168,7 @@ export class Last {
 				: this.rule.locator;
 			if (target == null) return input;
 			lastMatchPosition = input.lastIndexOf(target);
-			if (lastMatchPosition >= 0) lastMatch = { value: target, groups: [], index: 0 };
+			if (lastMatchPosition >= 0) lastMatch = { value: target, groups: [] };
 		}
 
 		if (!lastMatch || lastMatchPosition == null) return input;

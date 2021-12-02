@@ -1,11 +1,11 @@
-def(n) { i 1 + }
 def(ismul) {% 0 =}
 #(
     {"X" _ rep}
     /./ => {
-        do(n) 3 do(ismul) if {"Fizz"}
-        do(n) 5 do(ismul) if {"Buzz"}  
-        cat do(n) or
+        inc(n)
+        get(n) 3 do(ismul) if {"Fizz"}
+        get(n) 5 do(ismul) if {"Buzz"}  
+        cat get(n) or
         "\n"
     }
 )
