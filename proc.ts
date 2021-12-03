@@ -50,7 +50,7 @@ export class Proc {
 			if (instr instanceof Proc)
 				throw Error(`Bare proc blocks don't do anything (yet?)`);
 
-			if (/^-?\d+$/.test(instr))
+			if (/^-?\d+(\.\d*)?$/.test(instr))
 				push(instr);
 			else if (instr.startsWith('"'))
 				push(JSON.parse(instr));

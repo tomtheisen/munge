@@ -16,6 +16,7 @@ const formatMunger = parse(`
 			"\\t" get(indent) rep $1
 		}
 		/^(?: |\\t)*/m => { "\\t" get(indent) rep }
+		/!.*/ => ()
 		/\\(|{/ => fx { inc(indent) }
 		/\\)|}/ => fx { dec(indent) }
 		/(["'\\/])(\\\\.|.)*?\\1/ => ()

@@ -350,3 +350,10 @@ function singleRule(find: Locator, replace: Munger) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = "lol";
+    const {munger: replace} = parse(`{ 1.4 -3 }`);
+    const expected = "1.4-3";
+    testCase(input, replace, expected);
+}
+

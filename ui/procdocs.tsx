@@ -23,6 +23,11 @@ export class ProcDocs extends RedactioComponent {
 					Blocks are groups of instructions enclosed in curly braces. <code>{`{ }`}</code>
 					Blocks can be nested.
 				</p>
+				<p>
+					Some instructions take a named variable in parentheses like <code>set(x)</code>.
+					This is the equivalent of <code>"x" set</code>.
+					This allows a crude form of indirection by allowing non-constant variable names.
+				</p>
 				<h2>Proc Instructions</h2>
 				<dl>
 					<dt><code>_</code></dt>

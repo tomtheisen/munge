@@ -235,7 +235,11 @@ export class MungerDocs extends RedactioComponent {
 							)`} />
 				</section>
 				<p>
-					Did you know?  You can press <kbd>Ctrl</kbd> + <kbd>S</kbd> to generate a permalink.
+					Did you know?  
+					You can press <kbd>Ctrl</kbd> + <kbd>S</kbd> to generate a permalink.
+					<kbd>Ctrl</kbd> + <kbd>/</kbd> is block comment.
+					<kbd>Tab</kbd> is block indent.
+					<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>F</kbd> is munger auto-indent.
 				</p>
 			</article>
 		);
