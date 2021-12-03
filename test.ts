@@ -342,3 +342,11 @@ function singleRule(find: Locator, replace: Munger) {
     const expected = "3";
     testCase(input, replace, expected);
 }
+
+{
+    const input = "a cc bbb";
+    const {munger: replace} = parse(`#(/\\w+/ => { _ push(arr) } { sort(arr) " " join(arr) } )`);
+    const expected = "a bbb cc";
+    testCase(input, replace, expected);
+}
+

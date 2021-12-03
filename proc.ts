@@ -54,7 +54,7 @@ export class Proc {
 				push(instr);
 			else if (instr.startsWith('"'))
 				push(JSON.parse(instr));
-			else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat|inc|dec|empty|count)\((\w+)\)$/.exec(instr)) {
+			else if (match = /^(set|get|push|pop|cons|uncons|join|rev|for|do|getat|setat|inc|dec|empty|count|sort)\((\w+)\)$/.exec(instr)) {
 				instructions.unshift(JSON.stringify(match[2]), match[1]);
 			}
 			else if (match = /^\$(\d+)$/.exec(instr)) {
@@ -154,6 +154,7 @@ export class Proc {
 					case 'uncons': push(ctx.arrays.get(pop())?.shift() ?? ""); break;
 					case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
 					case 'rev': ctx.arrays.get(pop())?.reverse(); break;
+					case 'sort': ctx.arrays.get(pop())?.sort(); break;
 					case 'empty': ctx.arrays.set(pop(), []); break;
 					case 'count': push(ctx.arrays.get(pop())?.length ?? 0); break;
 
