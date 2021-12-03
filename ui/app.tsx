@@ -3,6 +3,7 @@ import { parse, ParseFailure } from '../mungerparser.js';
 import { munge } from '../munger.js';
 import { AutoSizingTextArea } from './inputs.js';
 import { decodePermalink, makePermalink } from './permalinks.js';
+import { NotificationPop } from './notification.js';
 
 const MungerSourceKey = "MungerSource";
 const MungerDocKey = "MungerDoc";
@@ -50,6 +51,8 @@ export class MungerApp extends RedactioComponent {
 					<h2>Output <button onclick={() => this.copyOutput()}>⧉ Copy</button></h2>
 					<div ref="output" id="output"></div>
 				</div>
+
+				<div id="notification-area" ref="notificationArea"></div>
 			</div>);
 
 		this.loadState();
@@ -74,6 +77,7 @@ export class MungerApp extends RedactioComponent {
 	get input() { return this.refs.input as AutoSizingTextArea; }
 	get outputPanel() { return this.refs.outputPanel as HTMLDivElement; }
 	get output() { return this.refs.output as HTMLDivElement; }
+	get notificationArea() { return this.refs.notificationArea as HTMLDivElement; }
 
 	mounted() {
 		this.code.autosize();
@@ -137,7 +141,19 @@ export class MungerApp extends RedactioComponent {
 	}
 
 	savePermaLink() {
-		location.hash = makePermalink(this.code.value, this.input.value);
+		const permalink = location.hash = makePermalink(this.code.value, this.input.value);
+		const notification = 
+			<NotificationPop timeout={ 5000 }>
+				<a href={permalink}>Permalink</a> generated. {" "}
+				<span ref="check" hidden>✔</span>
+				<button onclick={() => {
+						navigator.clipboard.writeText(permalink);
+						notification.refs.check.hidden = false;
+					}}>
+					⧉ Copy
+				</button>
+			</NotificationPop>;
+		this.notificationArea.append(notification.element)
 	}
 
 	loadPermaLink() {
