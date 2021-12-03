@@ -1,5 +1,3 @@
-/** @jsxImportSource redactio */
-
 import { RedactioComponent } from 'redactio/jsx-runtime.js';
 import { MungeExample } from './example.js';
 

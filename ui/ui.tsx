@@ -1,5 +1,3 @@
-/** @jsxImportSource redactio */
-
 import { MungerApp } from './app.js';
 import { MungerDocs } from './docs.js';
 import { ProcDocs } from './procdocs.js';

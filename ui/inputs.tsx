@@ -1,5 +1,3 @@
-/** @jsxImportSource redactio */
-
 import { RedactioComponent, SimpleComponentProps } from 'redactio/jsx-runtime.js';
 
 export class AutoSizingTextArea extends RedactioComponent {

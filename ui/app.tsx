@@ -1,5 +1,3 @@
-/** @jsxImportSource redactio */
-
 import { RedactioComponent } from 'redactio/jsx-runtime.js';
 import { parse, ParseFailure } from '../mungerparser.js';
 import { munge } from '../munger.js';
