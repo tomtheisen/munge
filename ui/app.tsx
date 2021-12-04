@@ -25,7 +25,7 @@ const formatMunger = parse(`
 export class MungerApp extends RedactioComponent {
 	constructor() {
 		super(
-			<div>
+			<>
 				<h1 ref="mungeTitle" id="app-title">Text Munge</h1>
 				<div id="app-inputs">
 					<div>
@@ -53,7 +53,7 @@ export class MungerApp extends RedactioComponent {
 				</div>
 
 				<div id="notification-area" ref="notificationArea"></div>
-			</div>);
+			</>);
 
 		this.loadState();
 		this.loadPermaLink();
@@ -126,7 +126,7 @@ export class MungerApp extends RedactioComponent {
 			let success = <NotificationPop timeout={5000}>
 				Munging complete in { new Date().valueOf() - start.valueOf() } ms.
 			</NotificationPop>;
-			this.notificationArea.append(success.element);
+			this.notificationArea.append(success.root);
 		}
 		catch (er: any) {
 			if (er instanceof ParseFailure) {
@@ -142,7 +142,7 @@ export class MungerApp extends RedactioComponent {
 			let failure = <NotificationPop timeout={5000}>
 				Munging failed.
 			</NotificationPop>;
-			this.notificationArea.append(failure.element);
+			this.notificationArea.append(failure.root);
 			return;
 		}
 	}
@@ -159,7 +159,7 @@ export class MungerApp extends RedactioComponent {
 				<span ref="check" hidden>✔</span>
 				<button onclick={ copyclick }>⧉ Copy</button>
 			</NotificationPop>;
-		this.notificationArea.append(notification.element);
+		this.notificationArea.append(notification.root);
 	}
 
 	loadPermaLink() {
