@@ -136,6 +136,8 @@ export class ProcDocs extends RedactioComponent {
 
 					<dt><code>dump</code></dt>
 						<dd>Logs the current state of things to the console.</dd>
+					<dt><code>fail</code></dt>
+						<dd>Stop munging.  Pop a value and use it for a failure message.</dd>
 				</dl>
 				<h2>Parting Example</h2>
 				<p>

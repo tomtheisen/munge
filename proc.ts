@@ -72,6 +72,7 @@ export class Proc {
 			}
 			else
 				switch (instr) {
+					case 'fail': throw Error(`fail: ${ pop() }`);
 					case '_': push(input.value); break;
 					case 'len': push(pop().length); break;
 					case 'swap': push(pop(), pop()); break;
