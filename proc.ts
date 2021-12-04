@@ -14,7 +14,7 @@ export class Proc {
 	}
 
 	evaluate(input: Match, ctx: Context, stack: string[] = []): string {
-		function push(...es: (string | number)[]) {
+		function push(...es: (string | number | BigInt)[]) {
 			for (let e of es) {
 				stack.unshift(typeof e === 'string' ? e : e.toString());
 			}
@@ -23,6 +23,16 @@ export class Proc {
 			if (depth === 0)
 				return stack.shift() ?? "";
 			return stack.splice(depth, 1)[0] ?? "";
+		}
+		const intPattern = /^ *-?\d+ *$/;
+		function binaryNumeric(f1: (a: number, b: number) => number | bigint, f2: (a: bigint, b: bigint) => number |bigint) {
+			let b = pop(), a = pop();
+			if (intPattern.test(a) && intPattern.test(b)) {
+				push(f2(BigInt(a), BigInt(b)));
+			}
+			else {
+				push(f1(Number(a), Number(b)));
+			}
 		}
 		function getBlock() {
 			const block = instructions.shift();
@@ -90,15 +100,15 @@ export class Proc {
 						break;
 					case '>': push(pop(1) > pop() ? 1 : 0); break;
 					case '<': push(pop(1) < pop() ? 1 : 0); break;
-					case '>>': push(Number(pop(1)) > Number(pop()) ? 1 : 0); break;
-					case '<<': push(Number(pop(1)) < Number(pop()) ? 1 : 0); break;
-					case '>=': push(Number(pop(1)) >= Number(pop()) ? 1 : 0); break;
-					case '<=': push(Number(pop(1)) <= Number(pop()) ? 1 : 0); break;
+					case '>>': binaryNumeric((a, b) => a > b ? 1 : 0, (a, b) => a > b ? 1 : 0); break;
+					case '<<': binaryNumeric((a, b) => a < b ? 1 : 0, (a, b) => a < b ? 1 : 0); break;
+					case '>=': binaryNumeric((a, b) => a >= b ? 1 : 0, (a, b) => a >= b ? 1 : 0); break;
+					case '<=': binaryNumeric((a, b) => a <= b ? 1 : 0, (a, b) => a <= b ? 1 : 0); break;
 					case '=': push(pop() == pop() ? 1 : 0); break;
-					case '+': push(Number(pop()) + Number(pop())); break;
-					case '-': push(Number(pop(1)) - Number(pop())); break;
-					case '%': push(Number(pop(1)) % Number(pop())); break;
-					case '*': push(Number(pop()) * Number(pop())); break;
+					case '+': binaryNumeric((a, b) => a + b, (a, b) => a + b); break;
+					case '-': binaryNumeric((a, b) => a - b, (a, b) => a - b); break;
+					case '%': binaryNumeric((a, b) => a % b, (a, b) => a % b); break;
+					case '*': binaryNumeric((a, b) => a * b, (a, b) => a * b); break;
 					case '/': push(Number(pop(1)) / Number(pop())); break;
 					case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 					case 'floor': push(Math.floor(Number(pop()))); break;

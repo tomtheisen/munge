@@ -123,7 +123,10 @@ export class MungerApp extends RedactioComponent {
 			const output = munge(this.input.value, parsed.munger, parsed.named);
 			this.refs.output.innerText = output;
 			this.refs.outputPanel.hidden = false;
-			console.info(`elapsed: ${ new Date().valueOf() - start.valueOf() } ms`);
+			let success = <NotificationPop timeout={5000}>
+				Munging complete in { new Date().valueOf() - start.valueOf() } ms.
+			</NotificationPop>;
+			this.notificationArea.append(success.element);
 		}
 		catch (er: any) {
 			if (er instanceof ParseFailure) {
@@ -136,24 +139,27 @@ export class MungerApp extends RedactioComponent {
 				this.refs.codeError.innerText = er?.toString();
 			}
 			this.refs.codeError.hidden = false;
+			let failure = <NotificationPop timeout={5000}>
+				Munging failed.
+			</NotificationPop>;
+			this.notificationArea.append(failure.element);
 			return;
 		}
 	}
 
 	savePermaLink() {
 		const permalink = location.hash = makePermalink(this.code.value, this.input.value);
+		const copyclick = () => {
+			navigator.clipboard.writeText(permalink);
+			notification.refs.check.hidden = false;
+		};
 		const notification = 
-			<NotificationPop timeout={ 5000 }>
+			<NotificationPop timeout={5000}>
 				<a href={permalink}>Permalink</a> generated. {" "}
 				<span ref="check" hidden>✔</span>
-				<button onclick={() => {
-						navigator.clipboard.writeText(permalink);
-						notification.refs.check.hidden = false;
-					}}>
-					⧉ Copy
-				</button>
+				<button onclick={ copyclick }>⧉ Copy</button>
 			</NotificationPop>;
-		this.notificationArea.append(notification.element)
+		this.notificationArea.append(notification.element);
 	}
 
 	loadPermaLink() {

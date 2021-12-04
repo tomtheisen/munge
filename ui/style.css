@@ -130,8 +130,9 @@ footer {
 
 #notification-area {
 	position: fixed;
-	left: 1em;
-	bottom: 1em;
+	z-index: 1;
+	left: 2em;
+	bottom: 3em;
 }
 
 .notification {
