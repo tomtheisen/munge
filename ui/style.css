@@ -129,7 +129,7 @@ footer {
 }
 
 #notification-area {
-	position: absolute;
+	position: fixed;
 	left: 1em;
 	bottom: 1em;
 }
