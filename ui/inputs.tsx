@@ -1,5 +1,16 @@
 import { RedactioComponent, SimpleComponentProps } from 'redactio/jsx-runtime.js';
 
+document.head.append((
+	<style>{`
+		textarea {
+			resize: none;
+			width: 100%;
+			min-height: 2em;
+			max-height: 50vh;
+		}`}
+	</style>
+	).root)
+
 export class AutoSizingTextArea extends RedactioComponent {
 	allowComments?: boolean;
 

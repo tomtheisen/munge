@@ -3,6 +3,34 @@ import { munge } from '../munger.js';
 import { parse } from '../mungerparser.js';
 import { makePermalink } from './permalinks.js'
 
+document.head.appendChild(
+	(<style>{`
+		.example {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-around;
+		}
+
+		.example > * {
+			flex: auto;
+			margin: 0.3em;
+			display: flex;
+			flex-direction: column;
+		}
+
+		.example h5 {
+			margin: 0;
+		}
+
+		.example pre {
+			background: #0008;
+			padding: 0.7em;
+			font-size: 90%;
+			flex-grow: 1;
+			margin: 0.5em 0;
+		}
+	`}</style>).root);
+
 const {  munger: normalizer } = parse(`
 #( ! dedent
 	/^(\\s*\\n)+/ => ""
