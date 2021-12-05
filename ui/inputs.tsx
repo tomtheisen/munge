@@ -120,13 +120,19 @@ export class AutoSizingTextArea extends RedactioComponent {
 			let indentPattern = /[ \t]*/y;
 			indentPattern.lastIndex = this.value.lastIndexOf("\n", start - 1) + 1;
 			const indent = indentPattern.exec(this.value.substring(0, start))?.[0] ?? "";
-			this.value = this.value.substring(0, start) + "\n" + indent + this.value.substring(start);
-			this.selectionStart = this.selectionEnd = start + 1 + indent?.length;
+			if (/{}|\(\)/.test(this.value.substr(start - 1, 2))) {
+				this.value = this.value.substring(0, start) + "\n" + indent + "\t\n" + indent + this.value.substring(start);
+				this.selectionStart = this.selectionEnd = start + 2 + indent?.length;
+			}
+			else {
+				this.value = this.value.substring(0, start) + "\n" + indent + this.value.substring(start);
+				this.selectionStart = this.selectionEnd = start + 1 + indent?.length;
+			}
 		}
 	}
 
 	expandSelectionToLine() {
-		this.selectionStart = this.value.lastIndexOf("\n", this.selectionStart) + 1;
+		this.selectionStart = this.value.lastIndexOf("\n", this.selectionStart - 1) + 1;
 		this.selectionEnd  = (this.value + "\n").indexOf("\n", this.selectionEnd - 1) + 1;
 	}
 
