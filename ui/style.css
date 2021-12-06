@@ -8,29 +8,16 @@ html {
 	tab-size: 4;
 }
 
-body {
-	margin: 0;
-}
+body { margin: 0; }
 
-.faint {
-	color: #678;
-}
+.faint { color: #678; }
 
-.error {
-	color: #d65;
-}
+.error { color: #d65; }
 
 input, textarea {
 	background: #012;
 	color: #def;
 	font-size: 100%;
-}
-
-textarea {
-	resize: none;
-	width: 100%;
-	min-height: 2em;
-	max-height: 50vh;
 }
 
 button {
@@ -41,82 +28,20 @@ button {
 	vertical-align: middle;
 }
 
-a {
-	color: #b7c;
-}
+a { color: #b7c; }
 
-#app-title {
-	margin: 0;
-}
-
-#app-inputs {
-	display: flex;
-	flex-wrap: wrap;
-	margin: 0 -1em;
-}
-
-#app-inputs > * {
-	flex-grow: 1;
-	min-width: calc(min(36em, 100vw - 5em));
-	margin: 0 1em;
-}
-
-#app-inputs h2 {
-	line-height: 2;
-}
-
-h2 {
-	margin: 0.5em 0 0.2em;
-}
-
-#output {
-	white-space: pre;
-	background: #234;
-	padding: 1em;
-	font-family: monospace;
-}
+h2 { margin: 0.5em 0 0.2em; }
 
 article {
 	max-width: 48em;
 	margin: 0 auto;
 }
 
-.example {
-	display: flex;
-	flex-wrap: wrap;
-	justify-content: space-around;
-}
+aside { margin-bottom: 2em; }
 
-.example > * {
-	flex: auto;
-	margin: 0.3em;
-	display: flex;
-	flex-direction: column;
-}
+code { background: #0008; }
 
-.example h5 {
-	margin: 0;
-}
-
-.example pre {
-	background: #0008;
-	padding: 0.7em;
-	font-size: 90%;
-	flex-grow: 1;
-	margin: 0.5em 0;
-}
-
-aside {
-	margin-bottom: 2em;
-}
-
-code {
-	background: #0008;
-}
-
-dfn {
-	background: #323;
-}
+dfn { background: #323; }
 
 footer {
 	position: absolute;
@@ -126,30 +51,4 @@ footer {
 	text-overflow: ellipsis;
 	overflow: hidden;
 	width: calc(100vw - 4em);
-}
-
-#notification-area {
-	position: fixed;
-	z-index: 1;
-	left: 2em;
-	bottom: 3em;
-}
-
-.notification {
-	background: #9b9a5c;
-	color: #012;
-	padding: 0.5em;
-	border-radius: 1em;
-	margin: 0.5em;
-}
-
-.notification a {
-	color: #415;
-}
-
-.notification-close,
-.notification button {
-	margin-inline-end: 1em;
-	margin-inline-start: 1em;
-	cursor: pointer;
 }

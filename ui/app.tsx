@@ -5,6 +5,44 @@ import { AutoSizingTextArea } from './inputs.js';
 import { decodePermalink, makePermalink } from './permalinks.js';
 import { NotificationPop } from './notification.js';
 
+document.head.appendChild((
+	<style>{`
+		#app-title {
+			margin: 0;
+		}
+		
+		#app-inputs {
+			display: flex;
+			flex-wrap: wrap;
+			margin: 0 -1em;
+		}
+		
+		#app-inputs > * {
+			flex-grow: 1;
+			min-width: calc(min(36em, 100vw - 5em));
+			margin: 0 1em;
+		}
+		
+		#app-inputs h2 {
+			line-height: 2;
+		}
+
+		#output {
+			white-space: pre;
+			background: #234;
+			padding: 1em;
+			font-family: monospace;
+		}
+
+		#notification-area {
+			position: fixed;
+			z-index: 1;
+			left: 2em;
+			bottom: 3em;
+		}
+	`}</style>
+).root);
+
 const MungerSourceKey = "MungerSource";
 const MungerDocKey = "MungerDoc";
 
@@ -25,7 +63,7 @@ const formatMunger = parse(`
 export class MungerApp extends RedactioComponent {
 	constructor() {
 		super(
-			<div>
+			<>
 				<h1 ref="mungeTitle" id="app-title">Text Munge</h1>
 				<div id="app-inputs">
 					<div>
@@ -53,7 +91,7 @@ export class MungerApp extends RedactioComponent {
 				</div>
 
 				<div id="notification-area" ref="notificationArea"></div>
-			</div>);
+			</>);
 
 		this.loadState();
 		this.loadPermaLink();
