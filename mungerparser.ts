@@ -1,4 +1,4 @@
-import { ComposedLocator, Last, Locator, LocatorComposition, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
+import { Last, Locator, LocatorComposition, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
 import { Proc } from "./proc.js";
 
 export class ParseFailure {
@@ -15,7 +15,7 @@ export class ParseFailure {
 	}
 }
 
-export function parse(source: string): { munger: Munger, named: Map<string, Munger> } {
+export function parse(source: string): { munger: Munger, locators: Map<string, Locator>, mungers: Map<string, Munger> } {
 	let consumed = 0;
 
 	const Upcoming = /.*/y;
@@ -79,7 +79,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 
 	const ComposedLocatorOpen = /\[/y;
 	const ComposedLocatorClose = /\]/y;
-	function parseComposedLocator(): ComposedLocator | undefined {
+	function parseComposedLocator(): Locator | undefined {
 		const CompositionQuantifier = /[?+*]/y;
 		function parseQuantifiedLocator(): Locator | undefined {
 			const base = parseLocator();
@@ -132,6 +132,7 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		let result = parseAlternativeLocator();
 		if (result == null) fail(`Expected locator after '['`); 
 		if (!tryParse(ComposedLocatorClose)) fail(`Expected ']' after composed locator definition`);
+		return result;
 	}
 
 	function parseLocator(): Locator | undefined {
@@ -231,6 +232,8 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return new Last(rule);
 	}
 
+	let namedLocators = new Map<string, Locator>();
+
 	let namedMungers = new Map<string, Munger>();
 	const NamedMungerRef = /do\((\w+)\)/y
 	function parseNamedMungerRef(): Munger | undefined {
@@ -251,6 +254,23 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 			?? parseSingleRule()
 			?? parseDoubleStringLiteral()
 			?? parseNamedMungerRef();
+	}
+
+	const LocatorDeclaration = /loc\((\w+)\)/y;
+	function parseLocatorDef(): { name: string, locator: Locator } | undefined {
+		let decl = tryParse(LocatorDeclaration);
+		if (decl == null) return undefined;
+		const name = decl[1];
+		let locator = parseLocator();
+		if (locator == null) fail(`Expected locator definition after named declaration`);
+		return { name, locator };
+	}
+
+	while (true) {
+		const named = parseLocatorDef();
+		if (named == null) break;
+		if (namedLocators.has(named.name)) fail(`Duplicate loc() for ${ named.name }`);
+		namedLocators.set(named.name, named.locator);
 	}
 
 	const MungerDeclaration = /def\((\w+)\)/y;
@@ -274,5 +294,5 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 	const munger = parseMunger();
 	if (munger == null) fail(`Expected munger definition`);
 	if (!tryParse(EOF)) fail(`Expected EOF following munger`);
-	return { munger, named: namedMungers };
+	return { munger, locators: namedLocators, mungers: namedMungers };
 }

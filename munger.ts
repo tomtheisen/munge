@@ -21,9 +21,12 @@ export type Match = {
 export type LocatedMatch = Match & { index: number; };
 
 const emptyMap = new Map;
-export function munge(input: string, munger: Munger, mungers: ReadonlyMap<string, Munger> = emptyMap) {
+export function munge(input: string, munger: Munger, 
+	locators: ReadonlyMap<string, Locator> = emptyMap, 
+	mungers: ReadonlyMap<string, Munger> = emptyMap) 
+{
 	const lineNormalized = input.replace(/\r\n?/g, "\n");
-	const newContext = { registers: new Map, arrays: new Map, mungers };
+	const newContext = { registers: new Map, arrays: new Map, locators, mungers };
 	return mungeCore({ value: lineNormalized, groups: [] }, munger, newContext);
 }
 
@@ -89,20 +92,20 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 			}
 			case LocatorComposition.Sequence: {
 				if (sticky) {
-					let nextStartFrom = startFrom, result = [];
+					let nextStartFrom = startFrom, result: string[] = [];
 					for (const child of locator.children) {
 						const match = nextMatch(input, child, nextStartFrom, true);
 						if (match == null) return undefined;
 						result.push(match.value);
 						nextStartFrom += match.value.length;
 					}
-					return { value: result.join(""), index: startFrom, groups: [] };
+					return { value: result.join(""), index: startFrom, groups: result };
 				}
 				else {
 					for (let nextStartFrom = startFrom; ;) {
 						const candidate = nextMatch(input, locator.children[0], nextStartFrom, false);
 						if (candidate == null) return undefined;
-						const match = nextMatch(input, locator, nextStartFrom, true);
+						const match = nextMatch(input, locator, candidate.index, true);
 						if (match != null) return match;
 						nextStartFrom = candidate.index + 1;
 					}

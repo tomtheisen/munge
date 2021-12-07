@@ -357,3 +357,17 @@ function singleRule(find: Locator, replace: Munger) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = " abc abc";
+    const {munger: replace} = parse(`[ 'a' 'b' ] => "seq" `);
+    const expected = " seqc seqc";
+    testCase(input, replace, expected);
+}
+
+{
+    const input = "xabbasbbbxasaby";
+    const {munger: replace} = parse(`[ ['a' 's'?]+ 'b'+ ] => "_" `);
+    const expected = "x__x_y";
+    testCase(input, replace, expected);
+}
+

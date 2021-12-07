@@ -64,8 +64,8 @@ export class MungeExample extends RedactioComponent {
 		const source = munge(attrs.munger, normalizer);
 		this.refs.munger.innerText = source;
 		this.refs.input.innerText = input;
-		const { munger, named } = parse(attrs.munger);
-		this.refs.output.innerText = munge(input, munger, named);
+		const { munger, mungers, locators } = parse(attrs.munger);
+		this.refs.output.innerText = munge(input, munger, locators, mungers);
 
 		this.permalink.href = '?' + makePermalink(source, input);
 	}
