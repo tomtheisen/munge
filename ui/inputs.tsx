@@ -93,19 +93,26 @@ export class AutoSizingTextArea extends RedactioComponent {
 				else this.replaceSelection(/^(\s*)(?!$)/mg, "$1! ");
 			}
 		}
-		else if (ev.key === "{" || ev.key === "(") {
-			ev.preventDefault();
-			const close = {"(":")", "{":"}"}[ev.key];
+		else if (ev.key === "{" || ev.key === "(" || ev.key === "'" || ev.key === '"') {
+			const start = this.selectionStart, end = this.selectionEnd;
+
+			const close = {"(":")", "{":"}", "'": "'", '"': '"'}[ev.key];
 			if (this.selection) {
-				const start = this.selectionStart, end = this.selectionEnd;
+				ev.preventDefault();
 				this.value = this.value.substring(0, start) + ev.key + this.selection + close + this.value.substring(end);
 				this.selectionStart = start + 1;
 				this.selectionEnd = end + 1;
 			}
 			else {
-				const start = this.selectionStart;
-				this.value = this.value.substring(0, start) + ev.key + close + this.value.substring(start);
-				this.selectionStart = this.selectionEnd = start + 1; 
+				const lineStart = this.value.lastIndexOf('\n', start - 1) + 1;
+				const lineEnd = (this.value + '\n').indexOf('\n', start);
+				const line = this.value.substring(lineStart, lineEnd);
+				const occurs = line.split(ev.key).length - 1;
+				if (occurs % 2 === 0) {
+					ev.preventDefault();
+					this.value = this.value.substring(0, start) + ev.key + close + this.value.substring(start);
+					this.selectionStart = this.selectionEnd = start + 1; 
+				}
 			}
 		}
 		else if (ev.key === "}" || ev.key === ")") {
@@ -127,6 +134,16 @@ export class AutoSizingTextArea extends RedactioComponent {
 			else {
 				this.value = this.value.substring(0, start) + "\n" + indent + this.value.substring(start);
 				this.selectionStart = this.selectionEnd = start + 1 + indent?.length;
+			}
+		}
+		else if (ev.key === "Backspace" && this.selection === "" && !ev.shiftKey && !ev.ctrlKey && !ev.altKey) {
+			const empties = ["{}","()","''",'""'];
+			const start = this.selectionStart;
+			const surrounding = this.value.substr(start - 1, 2);
+			if (empties.includes(surrounding)) {
+				ev.preventDefault();
+				this.value = this.value.substring(0, start - 1) + this.value.substring(start + 1);
+				this.selectionStart = this.selectionEnd = start - 1;
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-import { RedactioComponent } from 'redactio/jsx-runtime.js';
+import { RedactioComponent, RenderOutput } from 'redactio/jsx-runtime.js';
 import { parse, ParseFailure } from '../mungerparser.js';
 import { munge } from '../munger.js';
 import { AutoSizingTextArea } from './inputs.js';
@@ -156,14 +156,16 @@ export class MungerApp extends RedactioComponent {
 		this.saveState();
 		const start = new Date
 		try {
+			this.refs.output.innerText = "";
 			const parsed = parse(this.code.value);
 			this.refs.codeError.hidden = true;
 			const output = munge(this.input.value, parsed.munger, parsed.named);
 			this.refs.output.innerText = output;
 			this.refs.outputPanel.hidden = false;
-			let success = <NotificationPop timeout={5000}>
-				Munging complete in { new Date().valueOf() - start.valueOf() } ms.
-			</NotificationPop>;
+			let success: RenderOutput = (
+				<NotificationPop timeout={5000}>
+					Munging complete in { new Date().valueOf() - start.valueOf() } ms.
+				</NotificationPop>);
 			this.notificationArea.append(success.root);
 		}
 		catch (er: any) {
@@ -177,9 +179,10 @@ export class MungerApp extends RedactioComponent {
 				this.refs.codeError.innerText = er?.toString();
 			}
 			this.refs.codeError.hidden = false;
-			let failure = <NotificationPop timeout={5000}>
-				Munging failed.
-			</NotificationPop>;
+			let failure: RenderOutput = (
+				<NotificationPop timeout={5000}>
+					Munging failed.
+				</NotificationPop>);
 			this.notificationArea.append(failure.root);
 			return;
 		}
@@ -191,12 +194,12 @@ export class MungerApp extends RedactioComponent {
 			navigator.clipboard.writeText(permalink);
 			notification.refs.check.hidden = false;
 		};
-		const notification = 
+		const notification: RenderOutput = (
 			<NotificationPop timeout={5000}>
 				<a href={permalink}>Permalink</a> generated. {" "}
 				<span ref="check" hidden>✔</span>
 				<button onclick={ copyclick }>⧉ Copy</button>
-			</NotificationPop>;
+			</NotificationPop>);
 		this.notificationArea.append(notification.root);
 	}
 
