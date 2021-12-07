@@ -93,6 +93,10 @@ export class AutoSizingTextArea extends RedactioComponent {
 				else this.replaceSelection(/^(\s*)(?!$)/mg, "$1! ");
 			}
 		}
+		else if ("})'\"".includes(ev.key) && this.selection === "" && this.value[this.selectionStart] === ev.key) {
+			ev.preventDefault();
+			this.selectionStart = ++this.selectionEnd;
+		}
 		else if (ev.key === "{" || ev.key === "(" || ev.key === "'" || ev.key === '"') {
 			const start = this.selectionStart, end = this.selectionEnd;
 
@@ -113,12 +117,6 @@ export class AutoSizingTextArea extends RedactioComponent {
 					this.value = this.value.substring(0, start) + ev.key + close + this.value.substring(start);
 					this.selectionStart = this.selectionEnd = start + 1; 
 				}
-			}
-		}
-		else if (ev.key === "}" || ev.key === ")") {
-			if (this.selection === "" && this.value[this.selectionStart] === ev.key) {
-				ev.preventDefault();
-				this.selectionStart = ++this.selectionEnd;
 			}
 		}
 		else if (ev.key === "Enter" && this.selection === "" && !ev.ctrlKey) {
