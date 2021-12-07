@@ -1,4 +1,4 @@
-import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
+import { ComposedLocator, Last, Locator, LocatorComposition, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
 import { Proc } from "./proc.js";
 
 export class ParseFailure {
@@ -71,16 +71,74 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 	}
 
 	const NamedLocator = /get\((\w+)\)/y;
-	function parseNamedLocator() {
+	function parseGetLocator() {
 		const match = tryParse(NamedLocator);
 		if (match == null) return undefined;
 		return { locatorName: match[1] };
 	}
 
+	const ComposedLocatorOpen = /\[/y;
+	const ComposedLocatorClose = /\]/y;
+	function parseComposedLocator(): ComposedLocator | undefined {
+		const CompositionQuantifier = /[?+*]/y;
+		function parseQuantifiedLocator(): Locator | undefined {
+			const base = parseLocator();
+			if (base == null) return undefined;
+			const quant = tryParse(CompositionQuantifier);
+			if (quant == null) return base;
+			const type: LocatorComposition = {
+				"?": LocatorComposition.Optional, 
+				"*": LocatorComposition.ZeroOrMore, 
+				"+": LocatorComposition.OneOrMore, 
+			}[quant[0]] ?? LocatorComposition.Sequence;
+			return { type, children: [base] };
+		}
+	
+		function parseSequencedLocator(): Locator | undefined {
+			const first = parseQuantifiedLocator();
+			if (first == null) return undefined;
+	
+			const second = parseQuantifiedLocator();
+			if (second == null) return first;
+	
+			let result = { type: LocatorComposition.Sequence, children: [first, second] };
+			while (true) {
+				const next = parseQuantifiedLocator();
+				if (next == null) return result;
+				result.children.push(next);
+			}
+		}
+	
+		const CompositionAlternative = /\|/y;
+		function parseAlternativeLocator(): Locator | undefined {
+			const first = parseSequencedLocator();
+			if (first == null) return undefined;
+	
+			if (!tryParse(CompositionAlternative)) return first;
+	
+			const second = parseSequencedLocator();
+			if (second == null) fail(`Expected locator after '|' composition operator`);
+	
+			let result = { type: LocatorComposition.Alternative, children: [first, second] };
+			while (true) {
+				if (!tryParse(CompositionAlternative)) return result;
+				const next = parseSequencedLocator();
+				if (next == null) fail(`Expected locator after '|' composition operator`);
+				result.children.push(next);
+			}
+		}
+	
+		if (!tryParse(ComposedLocatorOpen)) return undefined;
+		let result = parseAlternativeLocator();
+		if (result == null) fail(`Expected locator after '['`); 
+		if (!tryParse(ComposedLocatorClose)) fail(`Expected ']' after composed locator definition`);
+	}
+
 	function parseLocator(): Locator | undefined {
 		return parseSingleStringLiteral() 
 			?? parseRegExpLiteral()
-			?? parseNamedLocator();
+			?? parseGetLocator()
+			?? parseComposedLocator();
 	}
 
 	const GoesTo = /=>/y;
@@ -155,14 +213,6 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return new Repeater(munger);
 	}
 
-	const EatPrefix = /eat\b/y;
-	function parseEater(): Sequence | undefined {
-		if (!tryParse(EatPrefix)) return undefined;
-		const munger = parseMunger();
-		if (munger == null) fail(`Expected munger after 'eat' decorator`);
-		return new Sequence(Number.POSITIVE_INFINITY, munger, "");
-	}
-
 	const EffectPrefix = /fx\b/y;
 	function parseEffect(): SideEffects | undefined {
 		if (!tryParse(EffectPrefix)) return undefined;
@@ -196,7 +246,6 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 			?? parseSequence()
 			?? parseRepeater()
 			?? parseLast()
-			?? parseEater()
 			?? parseEffect()
 			?? parseProc()
 			?? parseSingleRule()

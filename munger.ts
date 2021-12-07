@@ -1,7 +1,9 @@
 import { Proc } from "./proc.js";
 
 export type NamedLocator = { locatorName: string };
-export type Locator = string | RegExp | NamedLocator;
+export enum LocatorComposition { Sequence, Alternative, Optional, OneOrMore, ZeroOrMore }
+export type ComposedLocator = { type: LocatorComposition, children: Locator[] }
+export type Locator = string | RegExp | NamedLocator | ComposedLocator;
 export type Rule = { locator: Locator, replace: Munger };
 export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | SideEffects;
 
@@ -31,22 +33,91 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
 	else return munger.apply(input, ctx);
 }
 
-function nextMatch(input: string, locator: Locator, startFrom: number): LocatedMatch | undefined {
+function nextMatch(input: string, locator: Locator, startFrom: number, sticky: boolean): LocatedMatch | undefined {
 	if (typeof locator === 'string') {
-		const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
-		if (index >= 0) return { index, value: locator, groups: [] };
+		if (!sticky) {
+			const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
+			if (index >= 0) return { index, value: locator, groups: [] };
+		}
+		else if (input.substr(startFrom, locator.length) === locator) {
+				return { index: startFrom, value: locator, groups: [] };
+		}
 	}
 	else if (locator instanceof RegExp) {
 		if (!locator.global) throw "gotta be global";
-		locator.lastIndex = startFrom;
-		const match = locator.exec(input);
+		const regexp = sticky ? new RegExp(locator, "gy") : locator;
+		regexp.lastIndex = startFrom;
+		const match = regexp.exec(input);
 		if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
+	}
+	else if (isComposed(locator)) {
+		switch (locator.type) {
+			case LocatorComposition.Optional: {
+				let result = nextMatch(input, locator.children[0], startFrom, true);
+				if (result) return result;
+				return { index: startFrom, value: "", groups: [] };
+			}
+			case LocatorComposition.ZeroOrMore: {
+				let result = [], nextStartFrom = startFrom;
+				while (true) {
+					let match = nextMatch(input, locator.children[0], nextStartFrom, true);
+					if (!match) break;
+					result.push(match.value);
+					nextStartFrom += match.value.length;
+				}
+				return { index: startFrom, value: result.join(""), groups: [] };
+			}
+			case LocatorComposition.OneOrMore: {
+				const firstMatch = nextMatch(input, locator.children[0], startFrom, sticky);
+				if (firstMatch == null) return undefined;
+				let result = [firstMatch.value];
+				let nextStartFrom = firstMatch.index + firstMatch.value.length;
+				while (true) {
+					let match = nextMatch(input, locator.children[0], nextStartFrom, true);
+					if (!match) break;
+					result.push(match.value);
+					nextStartFrom += match.value.length;
+				}
+				return { index: startFrom, value: result.join(""), groups: [] };
+			}
+			case LocatorComposition.Alternative: {
+				for (const child of locator.children) {
+					const match = nextMatch(input, child, startFrom, sticky);
+					if (match != null) return match;
+				}
+				break;
+			}
+			case LocatorComposition.Sequence: {
+				if (sticky) {
+					let nextStartFrom = startFrom, result = [];
+					for (const child of locator.children) {
+						const match = nextMatch(input, child, nextStartFrom, true);
+						if (match == null) return undefined;
+						result.push(match.value);
+						nextStartFrom += match.value.length;
+					}
+					return { value: result.join(""), index: startFrom, groups: [] };
+				}
+				else {
+					for (let nextStartFrom = startFrom; ;) {
+						const candidate = nextMatch(input, locator.children[0], nextStartFrom, false);
+						if (candidate == null) return undefined;
+						const match = nextMatch(input, locator, nextStartFrom, true);
+						if (match != null) return match;
+						nextStartFrom = candidate.index + 1;
+					}
+				}
+			}
+		}
 	}
 	else throw `Unimplemented locator type ${ locator }`;
 }
 
 function isNamed(locator: Locator): locator is NamedLocator {
 	return typeof locator === "object" && "locatorName" in locator;
+}
+function isComposed(locator: Locator): locator is ComposedLocator {
+	return typeof locator === "object" && "type" in locator && "children" in locator;
 }
 
 export class Ruleset {
@@ -75,7 +146,7 @@ export class Ruleset {
 				const searchStart = i <= lastRuleIndex 
 					? Math.max(startOfMatch + 1, endOfMatch) 
 					: endOfMatch;
-				ruleMatches[i] = ruleMatch = nextMatch(input.value, locators[i], searchStart);
+				ruleMatches[i] = ruleMatch = nextMatch(input.value, locators[i], searchStart, false);
 				if (ruleMatch == null) continue;
 				if (bestMatch == null || ruleMatch.index < bestMatch.index) {
 					bestMatch = ruleMatch;
@@ -160,7 +231,10 @@ export class Last {
 				lastMatchPosition = m.index;
 				lastMatch = { value: m[0], groups: m.slice(1) };
 			}
-		} 
+		}
+		else if (isComposed(this.rule.locator)) {
+			throw Error(`Composed locators not supported inside of reverse lookups.`);
+		}
 		else {
 			const target = isNamed(this.rule.locator) 
 				? ctx.registers.get(this.rule.locator.locatorName) 
