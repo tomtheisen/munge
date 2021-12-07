@@ -1,6 +1,7 @@
 import { Proc } from "./proc.js";
 
-export type NamedLocator = { locatorName: string };
+export enum LocatorRefType { Register, Declaration };
+export type NamedLocator = { type: LocatorRefType, locatorName: string };
 export enum LocatorComposition { Sequence, Alternative, Optional, OneOrMore, ZeroOrMore }
 export type ComposedLocator = { type: LocatorComposition, children: Locator[] }
 export type Locator = string | RegExp | NamedLocator | ComposedLocator;
@@ -10,6 +11,7 @@ export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | Side
 export type Context = {
 	registers: Map<string, string>;
 	arrays: Map<string, string[]>;
+	locators: ReadonlyMap<string, Locator>;
 	mungers: ReadonlyMap<string, Munger>;
 };
 
@@ -36,7 +38,7 @@ function mungeCore(input: Match, munger: Munger, ctx: Context): string {
 	else return munger.apply(input, ctx);
 }
 
-function nextMatch(input: string, locator: Locator, startFrom: number, sticky: boolean): LocatedMatch | undefined {
+function nextMatch(input: string, locator: Locator, startFrom: number, sticky: boolean, ctx: Context): LocatedMatch | undefined {
 	if (typeof locator === 'string') {
 		if (!sticky) {
 			const index = startFrom > input.length ? -1 : input.indexOf(locator, startFrom);
@@ -53,17 +55,31 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 		const match = regexp.exec(input);
 		if (match) return { index: match.index, value: match[0], groups: match.slice(1) };
 	}
+	else if (isNamed(locator)) {
+		switch (locator.type) {
+			case LocatorRefType.Declaration: {
+				const target = ctx.locators.get(locator.locatorName);
+				if (target == null) throw Error(`Undeclared locator name: '${ locator.locatorName }'`);
+				return nextMatch(input, target, startFrom, sticky, ctx);
+			}
+			case LocatorRefType.Register: {
+				const target = ctx.registers.get(locator.locatorName);
+				if (target == null) return undefined;
+				return nextMatch(input, target, startFrom, sticky, ctx);
+			}
+		}
+	}
 	else if (isComposed(locator)) {
 		switch (locator.type) {
 			case LocatorComposition.Optional: {
-				let result = nextMatch(input, locator.children[0], startFrom, true);
+				let result = nextMatch(input, locator.children[0], startFrom, true, ctx);
 				if (result) return result;
 				return { index: startFrom, value: "", groups: [] };
 			}
 			case LocatorComposition.ZeroOrMore: {
 				let result = [], nextStartFrom = startFrom;
 				while (true) {
-					let match = nextMatch(input, locator.children[0], nextStartFrom, true);
+					let match = nextMatch(input, locator.children[0], nextStartFrom, true, ctx);
 					if (!match) break;
 					result.push(match.value);
 					nextStartFrom += match.value.length;
@@ -71,12 +87,12 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 				return { index: startFrom, value: result.join(""), groups: [] };
 			}
 			case LocatorComposition.OneOrMore: {
-				const firstMatch = nextMatch(input, locator.children[0], startFrom, sticky);
+				const firstMatch = nextMatch(input, locator.children[0], startFrom, sticky, ctx);
 				if (firstMatch == null) return undefined;
 				let result = [firstMatch.value];
 				let nextStartFrom = firstMatch.index + firstMatch.value.length;
 				while (true) {
-					let match = nextMatch(input, locator.children[0], nextStartFrom, true);
+					let match = nextMatch(input, locator.children[0], nextStartFrom, true, ctx);
 					if (!match) break;
 					result.push(match.value);
 					nextStartFrom += match.value.length;
@@ -85,7 +101,7 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 			}
 			case LocatorComposition.Alternative: {
 				for (const child of locator.children) {
-					const match = nextMatch(input, child, startFrom, sticky);
+					const match = nextMatch(input, child, startFrom, sticky, ctx);
 					if (match != null) return match;
 				}
 				break;
@@ -94,7 +110,7 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 				if (sticky) {
 					let nextStartFrom = startFrom, result: string[] = [];
 					for (const child of locator.children) {
-						const match = nextMatch(input, child, nextStartFrom, true);
+						const match = nextMatch(input, child, nextStartFrom, true, ctx);
 						if (match == null) return undefined;
 						result.push(match.value);
 						nextStartFrom += match.value.length;
@@ -103,9 +119,9 @@ function nextMatch(input: string, locator: Locator, startFrom: number, sticky: b
 				}
 				else {
 					for (let nextStartFrom = startFrom; ;) {
-						const candidate = nextMatch(input, locator.children[0], nextStartFrom, false);
+						const candidate = nextMatch(input, locator.children[0], nextStartFrom, false, ctx);
 						if (candidate == null) return undefined;
-						const match = nextMatch(input, locator, candidate.index, true);
+						const match = nextMatch(input, locator, candidate.index, true, ctx);
 						if (match != null) return match;
 						nextStartFrom = candidate.index + 1;
 					}
@@ -123,6 +139,13 @@ function isComposed(locator: Locator): locator is ComposedLocator {
 	return typeof locator === "object" && "type" in locator && "children" in locator;
 }
 
+function resolveNamedLocator(loc: NamedLocator, ctx: Context): Locator | undefined {
+	switch (loc.type) {
+		case LocatorRefType.Register: return ctx.registers.get(loc.locatorName);
+		case LocatorRefType.Declaration: return ctx.locators.get(loc.locatorName);
+	}
+}
+
 export class Ruleset {
 	rules: Rule[];
 	howMany: number;
@@ -136,7 +159,7 @@ export class Ruleset {
 		let startOfMatch = -1, endOfMatch = 0, output: string[] = [], lastRuleIndex = -1;
 		let ruleIndex: number, bestMatch: LocatedMatch | undefined;
 		const locators = this.rules
-			.map(r => isNamed(r.locator) ? ctx.registers.get(r.locator.locatorName) : r.locator)
+			.map(r => isNamed(r.locator) ? resolveNamedLocator(r.locator, ctx) : r.locator)
 			.filter((r): r is Exclude<Locator, NamedLocator> => r != null);
 		let ruleMatches: (LocatedMatch | undefined)[] = locators.map(() => ({ value: "", index: -1, groups: [] }));
 
@@ -149,7 +172,7 @@ export class Ruleset {
 				const searchStart = i <= lastRuleIndex 
 					? Math.max(startOfMatch + 1, endOfMatch) 
 					: endOfMatch;
-				ruleMatches[i] = ruleMatch = nextMatch(input.value, locators[i], searchStart, false);
+				ruleMatches[i] = ruleMatch = nextMatch(input.value, locators[i], searchStart, false, ctx);
 				if (ruleMatch == null) continue;
 				if (bestMatch == null || ruleMatch.index < bestMatch.index) {
 					bestMatch = ruleMatch;

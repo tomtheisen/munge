@@ -1,4 +1,4 @@
-import { Last, Locator, LocatorComposition, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
+import { Last, Locator, LocatorComposition, LocatorRefType, Munger, NamedLocator, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
 import { Proc } from "./proc.js";
 
 export class ParseFailure {
@@ -74,7 +74,7 @@ export function parse(source: string): { munger: Munger, locators: Map<string, L
 	function parseGetLocator() {
 		const match = tryParse(NamedLocator);
 		if (match == null) return undefined;
-		return { locatorName: match[1] };
+		return { type: LocatorRefType.Register, locatorName: match[1] };
 	}
 
 	const ComposedLocatorOpen = /\[/y;
@@ -138,8 +138,9 @@ export function parse(source: string): { munger: Munger, locators: Map<string, L
 	function parseLocator(): Locator | undefined {
 		return parseSingleStringLiteral() 
 			?? parseRegExpLiteral()
+			?? parseComposedLocator()
 			?? parseGetLocator()
-			?? parseComposedLocator();
+			?? parseNamedLocator();
 	}
 
 	const GoesTo = /=>/y;
@@ -233,6 +234,13 @@ export function parse(source: string): { munger: Munger, locators: Map<string, L
 	}
 
 	let namedLocators = new Map<string, Locator>();
+	const NamedLocatorRef = /\w+/y;
+	function parseNamedLocator(): NamedLocator | undefined {
+		const match = tryParse(NamedLocatorRef);
+		if (match == null) return undefined;
+		const name = match[0];
+		return { type: LocatorRefType.Declaration, locatorName: name };
+	}
 
 	let namedMungers = new Map<string, Munger>();
 	const NamedMungerRef = /do\((\w+)\)/y
