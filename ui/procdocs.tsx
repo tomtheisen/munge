@@ -76,8 +76,6 @@ export class ProcDocs extends RedactioComponent {
 					
 					<dt><code>not</code></dt>
 						<dd>Pop a value.  Push 0 if it's truthy, or 1 otherwise.</dd>
-					<dt><code>rep</code></dt>
-						<dd>Pop a repetition count.  Concatenate a popped string that many times.</dd>
 					<dt><code>or</code></dt>
 						<dd>Pop two values. Push the first one if it's truthy.  Otherwise push the second.</dd>
 

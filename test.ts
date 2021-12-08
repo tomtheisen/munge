@@ -170,41 +170,6 @@ function singleRule(find: Locator, replace: Munger) {
 }
 
 {
-    const input = "<outer><inner/><inner><child/></inner></outer>";
-    const replace = new Ruleset(Number.POSITIVE_INFINITY,
-        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
-        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
-        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\\n"') });
-    const expected = `
-<outer>
-    <inner/>
-    <inner>
-        <child/>
-    </inner>
-</outer>
-`.trimStart();
-    testCase(input, replace, expected);
-}
-
-{
-    const input = "<outer>                             <inner/><inner><child/></inner></outer>";
-    const replace = new Ruleset(Number.POSITIVE_INFINITY,
-        { locator: /\s+/g, replace: '' },
-        { locator: /<\w+>/g, replace: new Proc('" " "indent" get rep "indent" get 4 + "indent" set drop _ "\\n"') },
-        { locator: /<\/\w+>/g, replace: new Proc('" " "indent" get 4 - "indent" set rep _ "\\n"') },
-        { locator: /<\w+\/>/g, replace: new Proc('" " "indent" get rep _ "\\n"') });
-    const expected = `
-<outer>
-    <inner/>
-    <inner>
-        <child/>
-    </inner>
-</outer>
-`.trimStart();
-    testCase(input, replace, expected);
-}
-
-{
     const input = "a,b,c"
     const replace = singleRule(/\w+/g, new Proc('get(x) _ cat set(x)'))
     const expected = "a,ab,abc";
@@ -296,7 +261,7 @@ function singleRule(find: Locator, replace: Munger) {
 
 {
     const input = "1/2/3 4:56:789";
-    const { munger: replace } = parse('/\\d+/ => { 0 2 _ len - 0 max rep _ }');
+    const { munger: replace } = parse('/\\d+/ => { 2 _ len - 0 max times { 0 } _ }');
     const expected = "01/02/03 04:56:789";
     testCase(input, replace, expected);
 }

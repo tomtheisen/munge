@@ -111,7 +111,6 @@ export class Proc {
 					case '%': binaryNumeric((a, b) => a % b, (a, b) => a % b); break;
 					case '*': binaryNumeric((a, b) => a * b, (a, b) => a * b); break;
 					case '/': push(Number(pop(1)) / Number(pop())); break;
-					case 'rep': push(Array(Number(pop())).fill(pop()).join('')); break;
 					case 'floor': push(Math.floor(Number(pop()))); break;
 
 					case 'not': push(Number(pop()) ? 0 : 1); break;
