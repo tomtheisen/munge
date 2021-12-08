@@ -48,9 +48,9 @@ const formatMunger = parse(`
 	( ! format munger
 		/^(?: |\\t)*(\\)|})/m => { 
 			dec(indent) 
-			"\\t" get(indent) rep $1
+			get(indent) times { "\\t" } $1
 		}
-		/^(?: |\\t)*/m => { "\\t" get(indent) rep }
+		/^(?: |\\t)*/m => { get(indent) times { "\\t" } }
 		/!.*/ => ()
 		/\\(|{/ => fx { inc(indent) }
 		/\\)|}/ => fx { dec(indent) }
