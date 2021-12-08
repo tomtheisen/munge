@@ -3,7 +3,7 @@ import { Proc } from "./proc.js";
 export type NamedLocator = { locatorName: string };
 export type Locator = string | RegExp | NamedLocator;
 export type Rule = { locator: Locator, replace: Munger };
-export type Munger = string | Ruleset | Proc | Repeater | Sequence | Last | SideEffects;
+export type Munger = string | Ruleset | Proc | Repeater | Sequence | SideEffects;
 
 export type Context = {
 	registers: Map<string, string>;
@@ -141,39 +141,6 @@ export class Sequence {
 
 	repeat() {
 		return new Repeater(this);
-	}
-}
-
-export class Last {
-	rule: Rule;
-	constructor(rule: Rule) {
-		this.rule = rule;
-	}
-
-	apply(match: Match, ctx: Context): string {
-		const input = match.value;
-		let lastMatch: Match | undefined = undefined;
-		let lastMatchPosition : number | undefined = undefined;
-
-		if (this.rule.locator instanceof RegExp) {
-			for (let m of input.matchAll(this.rule.locator)) {
-				lastMatchPosition = m.index;
-				lastMatch = { value: m[0], groups: m.slice(1) };
-			}
-		} 
-		else {
-			const target = isNamed(this.rule.locator) 
-				? ctx.registers.get(this.rule.locator.locatorName) 
-				: this.rule.locator;
-			if (target == null) return input;
-			lastMatchPosition = input.lastIndexOf(target);
-			if (lastMatchPosition >= 0) lastMatch = { value: target, groups: [] };
-		}
-
-		if (!lastMatch || lastMatchPosition == null) return input;
-		return input.substring(0, lastMatchPosition) 
-			+ mungeCore(lastMatch, this.rule.replace, ctx)
-			+ input.substring(lastMatchPosition + lastMatch.value.length);
 	}
 }
 

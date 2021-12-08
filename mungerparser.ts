@@ -1,4 +1,4 @@
-import { Last, Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
+import { Locator, Munger, Repeater, Rule, Ruleset, Sequence, SideEffects } from './munger.js';
 import { Proc } from "./proc.js";
 
 export class ParseFailure {
@@ -171,16 +171,6 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return new SideEffects(munger);
 	}
 
-	const LastOpen = /last\s*\(/y;
-	const LastClose = /\)/y;
-	function parseLast(): Last | undefined {
-		if (!tryParse(LastOpen)) return undefined;
-		const rule = parseRule();
-		if (rule == null) fail(`Expected rule after 'last('`);
-		if (!tryParse(LastClose)) fail(`Expected ')' to close 'last('`);
-		return new Last(rule);
-	}
-
 	let namedMungers = new Map<string, Munger>();
 	const NamedMungerRef = /do\((\w+)\)/y
 	function parseNamedMungerRef(): Munger | undefined {
@@ -195,7 +185,6 @@ export function parse(source: string): { munger: Munger, named: Map<string, Mung
 		return parseRuleset()
 			?? parseSequence()
 			?? parseRepeater()
-			?? parseLast()
 			?? parseEater()
 			?? parseEffect()
 			?? parseProc()

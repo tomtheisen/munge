@@ -37,7 +37,6 @@ export class MungerDocs extends RedactioComponent {
 						<li><a href="#literal">String</a></li>
 						<li><a href="#repeater">Repeater</a></li>
 						<li><a href="#effects">Side-effect decorator</a></li>
-						<li><a href="#last">Last decorator</a></li>
 						<li><a href="#proc">Proc</a></li>
 						<li><a href="#named">Named Reference</a></li>
 					</ul>
@@ -163,14 +162,6 @@ export class MungerDocs extends RedactioComponent {
 						It's not too hard to make an infinite loop with these.
 					</p>
 					<MungeExample input="a{{}{{}}}b" munger={`@'{}' => ""`} />
-				</section>
-				<h2 id="last">Last match</h2>
-				<section>
-					<p>
-						You can apply a rule only to the last match of its locator using a <dfn>last</dfn>.
-						This can only be applied to a single rule.
-					</p>
-					<MungeExample input="foo foo foo" munger={`last('foo' => "bar")`}/>
 				</section>
 				<h2 id="comment">Comments</h2>
 				<section>

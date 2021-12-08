@@ -1,4 +1,4 @@
-import { munge, Ruleset, Munger, Sequence, Last, Locator } from './munger.js';
+import { munge, Ruleset, Munger, Sequence, Locator } from './munger.js';
 import { Proc } from "./proc.js";
 import { parse } from './mungerparser.js';
 
@@ -267,13 +267,6 @@ function singleRule(find: Locator, replace: Munger) {
 }
 
 {
-    const input = "axbxcxd";
-    const replace = new Last({ locator: 'x', replace: "y" });
-    const expected = "axbxcyd";
-    testCase(input, replace, expected);
-}
-
-{
     const input = "abc";
     const { munger: replace } = parse('#( "" )');
     const expected = "";
@@ -326,13 +319,6 @@ function singleRule(find: Locator, replace: Munger) {
     const input = "abc"
     const {munger: replace} = parse(`('' => "<" '' => ">" )`);
     const expected = "<>a<>b<>c<>";
-    testCase(input, replace, expected);
-}
-
-{
-    const input = "abcabc";
-    const {munger: replace} = parse(`#( fx { "b" set(t) } last(get(t) => "X") )`);
-    const expected = "abcaXc";
     testCase(input, replace, expected);
 }
 
