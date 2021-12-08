@@ -1,5 +1,5 @@
 import { RedactioComponent, SimpleComponentProps } from 'redactio/jsx-runtime.js';
-import { addStyle } from './style';
+import { addStyle } from './style.js';
 
 addStyle(`
 	textarea {

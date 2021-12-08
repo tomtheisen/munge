@@ -1,5 +1,5 @@
-import { RedactioComponent } from "redactio/jsx-runtime";
-import { addStyle } from "./style";
+import { RedactioComponent } from 'redactio/jsx-runtime';
+import { addStyle } from './style.js';
 
 addStyle(`
 	.notification {
