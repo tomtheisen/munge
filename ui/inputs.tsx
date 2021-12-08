@@ -111,8 +111,7 @@ export class AutoSizingTextArea extends RedactioComponent {
 				const lineStart = this.value.lastIndexOf('\n', start - 1) + 1;
 				const lineEnd = (this.value + '\n').indexOf('\n', start);
 				const line = this.value.substring(lineStart, lineEnd);
-				const occurs = line.split(ev.key).length - 1;
-				if (occurs % 2 === 0) {
+				if (line.indexOf(ev.key) < 0) {
 					ev.preventDefault();
 					this.value = this.value.substring(0, start) + ev.key + close + this.value.substring(start);
 					this.selectionStart = this.selectionEnd = start + 1; 
@@ -127,6 +126,10 @@ export class AutoSizingTextArea extends RedactioComponent {
 			const indent = indentPattern.exec(this.value.substring(0, start))?.[0] ?? "";
 			if (/{}|\(\)/.test(this.value.substr(start - 1, 2))) {
 				this.value = this.value.substring(0, start) + "\n" + indent + "\t\n" + indent + this.value.substring(start);
+				this.selectionStart = this.selectionEnd = start + 2 + indent?.length;
+			}
+			else if (/{|\(/.test(this.value.substr(start - 1, 1))) {
+				this.value = this.value.substring(0, start) + "\n" + indent + "\t" + this.value.substring(start);
 				this.selectionStart = this.selectionEnd = start + 2 + indent?.length;
 			}
 			else {
