@@ -191,7 +191,7 @@ export class MungerApp extends RedactioComponent {
 	savePermaLink() {
 		const permalink = location.hash = makePermalink(this.code.value, this.input.value);
 		const copyclick = () => {
-			navigator.clipboard.writeText(permalink);
+			navigator.clipboard.writeText(location.href.replace(/#.*/, "") + permalink);
 			notification.refs.check.hidden = false;
 		};
 		const notification: RenderOutput = (
