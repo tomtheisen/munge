@@ -156,7 +156,7 @@ export class ProcDocs extends RedactioComponent {
 					munger={`
 						def(nl) {                 ! macro definition for next line
 							"\\n"
-							"  " get(depth) rep   ! repeat indent string
+							get(depth) times {"  "} ! repeat indent string
 						}
 						(
 							/\\s/ => ""            ! strip pre-existing whitespace
