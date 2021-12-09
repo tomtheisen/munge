@@ -10,6 +10,7 @@ addStyle(`
 		display: block;
 		border-width:1px;
 		padding: 2px;
+		scrollbar-color: #789 #123;
 	}
 	
 	.editor-info {

@@ -71,6 +71,7 @@ export class MungerApp extends RedactioComponent {
 							&nbsp;<small class="faint">(<kbd>F2</kbd>)</small> 
 							&nbsp;<small><a href="?docs" target="_blank">?</a></small>
 							&nbsp;<small><a href="?" target="_blank">New</a></small>
+							&nbsp;<small><a href="?lib">Library</a></small>
 						</h2>
 						<AutoSizingTextArea allowComments={true} ref="code" />
 						<div ref="codeError" class="error" hidden></div>
