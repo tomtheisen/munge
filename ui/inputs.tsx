@@ -7,28 +7,52 @@ addStyle(`
 		width: 100%;
 		min-height: 2em;
 		max-height: 50vh;
+		display: block;
+		border-width:1px;
+		padding: 2px;
+	}
+	
+	.editor-info {
+		background: #678;
+		color: #012;
+		font-size: 80%;
+		padding: 3px;
+		width: 100%;
+		border-bottom-left-radius: 4px;
+		border-bottom-right-radius: 4px;
+		white-space: pre;
+		tab-size: 24;
 	}`);
 
 export class AutoSizingTextArea extends RedactioComponent {
 	allowComments?: boolean;
 
 	constructor(attr: { allowComments?: boolean } & SimpleComponentProps) {
-		super(<textarea 
-			spellcheck={false}
-			onkeydown={ev => this.keydown(ev)} 
-			oninput={() => this.autosize()} />);
+		super(
+			<div>
+				<textarea ref="textarea" spellcheck={false} 
+					onkeydown={ev => this.keydown(ev)} 
+					oninput={() => (this.autosize(), this.info()) }
+					onkeyup={() => this.info()}
+					onmousemove={ev => ev.buttons & 1 && this.info()} 
+					onmouseup={() => this.info()} 
+					/>
+				<div ref="info" class="editor-info"/>
+			</div>);
 
 		this.allowComments = attr.allowComments;
 
 		window.addEventListener("resize", () => this.autosize());
+		this.info();
 	}
 
-	private get textarea() { return this.element as HTMLTextAreaElement; }
+	private get textarea() { return this.refs.textarea as HTMLTextAreaElement; }
 
 	get value() { return this.textarea.value; }
 	set value(v: string) {
 		this.textarea.value = v;
 		this.autosize();
+		this.info();
 	}
 
 	get selectionStart() { return this.textarea.selectionStart; }
@@ -38,6 +62,13 @@ export class AutoSizingTextArea extends RedactioComponent {
 	set selectionEnd(value: number) { this.textarea.selectionEnd = value; }
 
 	get selection() { return this.value.substring(this.selectionStart, this.selectionEnd); }
+
+	focus() {
+		this.textarea.focus();
+	}
+	blur() {
+		this.textarea.blur();
+	}
 
 	keydown(ev: KeyboardEvent) {
 		if (ev.key === "Tab") {
@@ -145,6 +176,7 @@ export class AutoSizingTextArea extends RedactioComponent {
 				this.selectionStart = this.selectionEnd = start - 1;
 			}
 		}
+		this.info();
 	}
 
 	expandSelectionToLine() {
@@ -161,9 +193,23 @@ export class AutoSizingTextArea extends RedactioComponent {
 	}
 
 	autosize() {
-		if (this.element.isConnected) {
-			this.element.style.height = "auto";
-			this.element.style.height = this.element.scrollHeight + "px";
+		if (this.textarea.isConnected) {
+			this.textarea.style.height = "auto";
+			this.textarea.style.height = this.textarea.scrollHeight + "px";
+		}
+	}
+
+	info() {
+		if (this.selection === "") {
+			const line = this.value.substring(0, this.selectionStart).split('\n').length;
+			const col = this.selectionStart - this.value.lastIndexOf('\n', this.selectionStart - 1);
+			this.refs.info.innerText = `${ line }:${ col }`
+				+ `\tChars: ${ this.value.length }`
+				+ `\t Lines: ${ this.value.split('\n').length }`; 
+		}
+		else {
+			this.refs.info.innerText = `Selected: ${ this.selection.length }` 
+				+ `\tLines: ${ this.selection.split('\n').length }`;
 		}
 	}
 }

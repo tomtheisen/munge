@@ -32,6 +32,8 @@ addStyle(`
 		background: #234;
 		padding: 1em;
 		font-family: monospace;
+		overflow: auto;
+		max-height: 80vh;
 	}
 
 	#notification-area {
