@@ -123,6 +123,7 @@ export class Proc {
 					case 'cat': push(pop(1) + pop()); break;
 					case 'rpad': push(pop(1).padEnd(Number(pop()))); break;
 					case 'lpad': push(pop(1).padStart(Number(pop()))); break;
+					case 'zpad': push(pop(1).padStart(Number(pop()), '0')); break;
 					case 'index': push(pop(1).indexOf(pop())); break;
 					case 'lower': push(pop().toLowerCase()); break;
 					case 'upper': push(pop().toUpperCase()); break;

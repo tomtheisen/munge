@@ -84,6 +84,8 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>lpad</code></dt>
 					<dt><code>rpad</code></dt>
 						<dd>Pop a width.  Left- or right-pad a value to the specified width.</dd>
+					<dt><code>zpad</code></dt>
+						<dd>Pop a width.  Left-pad a value with zeroes to the specified width.</dd>
 					<dt><code>index</code></dt>
 						<dd>Pop two values.  Push the index of the first occurrence of the second in the first.</dd>
 					<dt><code>upper</code></dt>
