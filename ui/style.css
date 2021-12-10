@@ -8,7 +8,10 @@ html {
 	tab-size: 4;
 }
 
-body { margin: 0; }
+body { 
+	margin: 0; 
+	padding-bottom: 4em;
+}
 
 .faint { color: #678; }
 
@@ -30,11 +33,13 @@ button {
 
 a { color: #b7c; }
 
+:target { outline: solid; }
+
 h2 { margin: 0.5em 0 0.2em; }
 
 article {
 	max-width: 48em;
-	margin: 0 auto;
+	margin: 0 auto 4em auto;
 }
 
 aside { margin-bottom: 2em; }

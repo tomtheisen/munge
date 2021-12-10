@@ -8,6 +8,8 @@ addStyle(`
 		padding: 0.5em;
 		border-radius: 1em;
 		margin: 0.5em;
+		float: right;
+		clear: right;
 	}
 	
 	.notification a {

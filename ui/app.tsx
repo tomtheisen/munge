@@ -39,7 +39,7 @@ addStyle(`
 	#notification-area {
 		position: fixed;
 		z-index: 1;
-		left: 2em;
+		right: 2em;
 		bottom: 3em;
 	}`);
 
