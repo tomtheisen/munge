@@ -32,5 +32,13 @@ export function getLibarary() {
 						Line-wrap a paragraph</a>
 				</li>
 			</ul>
+
+			<h2>Utility</h2>
+			<ul>
+				<li>
+					<a href="?#eyJtIjoiIyhcblx0Ly4rLyA9PiB7IF8gcHVzaChsaW5lcykgZ2V0KHdpZHRoKSBfIGxlbiBtYXggc2V0KHdpZHRoKSB9XG5cdHtcblx0XHRnZXQod2lkdGgpIHRpbWVzIHtcblx0XHRcdGNvdW50KGxpbmVzKSB0aW1lcyB7XG5cdFx0XHRcdHVuY29ucyhsaW5lcylcblx0XHRcdFx0Y29weSAxIHNraXAgcHVzaChsaW5lcylcblx0XHRcdFx0MSB0YWtlIDEgcnBhZFxuXHRcdFx0fVxuXHRcdFx0XCJcXG5cIlxuXHRcdH1cblx0fVxuKSIsImkiOiJyaWdodFxuZG93blxudGhlXG5saW5lIn0=">
+						Transpose rows and columns</a>
+				</li>
+			</ul>
 		</>);
 }
