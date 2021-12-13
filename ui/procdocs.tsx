@@ -93,7 +93,7 @@ export class ProcDocs extends RedactioComponent {
 						<dd>Pop a value.  Convert the case and push.</dd>
 					<dt><code>take</code></dt>
 					<dt><code>skip</code></dt>
-						<dd>Pop an index.  Push the left or right substring of a value from that position.</dd>
+						<dd>Pop an index.  Push the left or right substring of a value from that position.  Negative numbers index from the end of the string.</dd>
 					<dt><code>ord</code></dt>
 					<dt><code>chr</code></dt>
 						<dd>Convert between a character and the corresponding unicode codepoint.</dd>

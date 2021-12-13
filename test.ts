@@ -308,3 +308,10 @@ function singleRule(find: Locator, replace: Munger) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = "abcdefg";
+    const {munger: replace} = parse(`{ _ -1 skip -2 take }`);
+    const expected = "ef";
+    testCase(input, replace, expected);
+}
+

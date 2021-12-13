@@ -127,8 +127,20 @@ export class Proc {
 					case 'index': push(pop(1).indexOf(pop())); break;
 					case 'lower': push(pop().toLowerCase()); break;
 					case 'upper': push(pop().toUpperCase()); break;
-					case 'skip': push(pop(1).substring(Number(pop()))); break;
-					case 'take': push(pop(1).substring(0, Number(pop()))); break;
+					case 'skip': {
+						const pos = Number(pop());
+						push(pos >= 0 
+							? pop().slice(pos)
+							: pop().slice(0, pos));
+						break;
+					}
+					case 'take': {
+						const pos = Number(pop());
+						push(pos >= 0
+							? pop().slice(0, pos)
+							: pop().slice(pos)); 
+						break;
+					}
 					case 'ord': push(pop().codePointAt(0) ?? 0); break;
 					case 'chr': push(String.fromCodePoint(Number(pop()))); break;
 					case 'hex': push(Number(pop()).toString(16)); break;
