@@ -315,3 +315,10 @@ function singleRule(find: Locator, replace: Munger) {
     testCase(input, replace, expected);
 }
 
+{
+    const input = "Hello, world!";
+    const {munger: replace} = parse(`#( /./ => { _ push(chars) } { uniq(chars) "" join(chars) } )`);
+    const expected = "Helo, wrd!";
+    testCase(input, replace, expected);
+}
+

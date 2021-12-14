@@ -123,6 +123,8 @@ export class ProcDocs extends RedactioComponent {
 						<dd>Pop a delimiter.  Use it to join a named array.  Push the result.</dd>
 					<dt><code>sort(x)</code></dt>
 						<dd>Sort a named array.  Does not touch the stack.</dd>
+					<dt><code>uniq(x)</code></dt>
+						<dd>Leave only the first occurrence of each distinct value in a named array.  Does not touch the stack.</dd>
 
 					<dt><code>if {`{ ... } [{ ... }]`}</code></dt>
 						<dd>Pop a condition.  If it's truthy, execute the following condition block.  Otherwise execute the else block, if present.</dd>
