@@ -79,6 +79,7 @@ export class Proc {
 					case 'copy': push(peek()); break;
 					case 'drop': pop(); break;
 					case 'clear': stack.splice(0); break;
+					case 'log': console.log(pop()); break;
 					case 'dump': console.log(JSON.parse(JSON.stringify({ 
 						instructions, 
 						stack, 
@@ -175,6 +176,11 @@ export class Proc {
 						break;
 					}
 					case 'uncons': push(ctx.arrays.get(pop())?.shift() ?? ""); break;
+					case 'getat': {
+						const name = pop(), pos = Number(pop());
+						push(ctx.arrays.get(name)?.[pos] ?? "");
+						break;
+					}
 					case 'join': push(ctx.arrays.get(pop())?.join(pop()) ?? ""); break;
 					case 'rev': ctx.arrays.get(pop())?.reverse(); break;
 					case 'sort': ctx.arrays.get(pop())?.sort(); break;

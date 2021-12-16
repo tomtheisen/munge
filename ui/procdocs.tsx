@@ -113,6 +113,8 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>uncons(x)</code></dt>
 					<dt><code>pop(x)</code></dt>
 						<dd>Push a value removed from the beginning or end of a named array.</dd>
+					<dt><code>getat(x)</code></dt>
+						<dd>Pop a 0-indexed position.  Read a value at that position in a named array and push it.</dd>
 					<dt><code>empty(x)</code></dt>
 						<dd>Remove all elements from named array.</dd>
 					<dt><code>count(x)</code></dt>
@@ -136,6 +138,8 @@ export class ProcDocs extends RedactioComponent {
 					<dt><code>do(x)</code></dt>
 						<dd>Invoke a named proc, established using a <code>def(x)</code> declaration.</dd>
 
+					<dt><code>log</code></dt>
+						<dd>Pop a value and log it to the console.</dd>
 					<dt><code>dump</code></dt>
 						<dd>Logs the current state of things to the console.</dd>
 					<dt><code>fail</code></dt>

@@ -28,6 +28,7 @@ addStyle(`
 	}
 
 	#output {
+		display: block;
 		white-space: pre;
 		background: #234;
 		padding: 1em;
@@ -88,7 +89,7 @@ export class MungerApp extends RedactioComponent {
 
 				<div ref="outputPanel" hidden>
 					<h2>Output <button onclick={() => this.copyOutput()}>⧉ Copy</button></h2>
-					<div ref="output" id="output"></div>
+					<output ref="output" id="output"></output>
 				</div>
 
 				<div id="notification-area" ref="notificationArea"></div>
