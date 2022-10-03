@@ -79,7 +79,7 @@ export class MungerDocs extends RedactioComponent {
 					<MungeExample input="f->m:buffer" munger={
 						`
 						(
-							/(\w)->(\w)/ => fx { 
+							/(\\w)->(\\w)/ => fx { 
 								$1 set(find) 
 								$2 set(replace) 
 							}
